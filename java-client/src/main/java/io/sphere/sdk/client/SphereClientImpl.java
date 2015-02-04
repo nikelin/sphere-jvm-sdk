@@ -21,7 +21,7 @@ final class SphereClientImpl extends Base implements SphereClient {
         this(config, new HttpSphereRequestExecutor(httpClient, config));
     }
 
-    public SphereClientImpl(final SphereApiConfig config, final SphereRequestExecutor sphereRequestExecutor) {
+    private SphereClientImpl(final SphereApiConfig config, final SphereRequestExecutor sphereRequestExecutor) {
         this.sphereRequestExecutor = sphereRequestExecutor;
     }
 
