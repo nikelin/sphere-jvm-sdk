@@ -22,10 +22,13 @@ object Build extends Build {
     .settings(unidocProjectFilter in (JavaUnidoc, unidoc) := inAnyProject -- inProjects(`test-lib`))
     .settings(documentationSettings:_*)
     .settings(commonSettings:_*)
-    .aggregate(common, `java-client`, models, `test-lib`)
-    .dependsOn(common, `java-client`, models, `test-lib`)
+    .aggregate(common, `java-client`, `java-client-core`, models, `test-lib`)
+    .dependsOn(common, `java-client`, `java-client-core`, models, `test-lib`)
 
-  lazy val `java-client` = project.configs(IntegrationTest).dependsOn(common).settings(commonSettings:_*)
+  lazy val `java-client-core` = project.configs(IntegrationTest).dependsOn(common).settings(commonSettings:_*)
+  .settings(libraryDependencies ++= Seq("com.ning" % "async-http-client" % "1.8.7"))
+
+  lazy val `java-client` = project.configs(IntegrationTest).dependsOn(`java-client-core`).settings(commonSettings:_*)
   .settings(libraryDependencies ++= Seq("com.ning" % "async-http-client" % "1.8.7"))
 
   lazy val common = project.configs(IntegrationTest).settings(writeVersionSettings: _*).settings(commonSettings:_*)
