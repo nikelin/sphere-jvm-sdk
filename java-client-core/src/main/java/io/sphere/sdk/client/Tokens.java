@@ -1,13 +1,19 @@
 package io.sphere.sdk.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /** OAuth tokens returned by the authorization server. */
 final class Tokens {
+    @JsonProperty("access_token")
     private final String accessToken;
+    @JsonProperty("refresh_token")
     private final String refreshToken;
+    @JsonProperty("expires_in")
     private final Optional<Long> expiresIn;
 
     public Tokens(String accessToken, String refreshToken, Optional<Long> expiresIn) {
@@ -26,5 +32,14 @@ final class Tokens {
     }
     public Optional<Long> getExpiresIn() {
         return expiresIn;
+    }
+
+    public static TypeReference<Tokens> typeReference() {
+        return new TypeReference<Tokens>() {
+            @Override
+            public String toString() {
+                return "TypeReference<Tokens>";
+            }
+        };
     }
 }

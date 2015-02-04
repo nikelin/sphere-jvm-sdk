@@ -15,10 +15,10 @@ public class SphereFixedAccessTokenSupplierImplTest extends IntegrationTest {
             final CategoryQuery categoryQuery = CategoryQuery.of();
             final int expected = client().execute(categoryQuery).getTotal();
             final SphereApiConfig apiConfig = SphereApiConfig.of(projectKey(), apiUrl());
-            final SphereAccessTokenSupplier refreshSupplier = SphereAccessTokenSupplier.ofAutoRefresh(SphereAuthConfig.of(projectKey(), clientId(), clientSecret(), authUrl()));
+            final SphereAccessTokenSupplier refreshSupplier = SphereAccessTokenSupplierFactory.of().createSupplierOfAutoRefresh(SphereAuthConfig.of(projectKey(), clientId(), clientSecret(), authUrl()));
             final String token = refreshSupplier.get();
             refreshSupplier.close();
-            final SphereAccessTokenSupplier fixedTokenSupplier = SphereAccessTokenSupplier.ofFixedToken(token);
+            final SphereAccessTokenSupplier fixedTokenSupplier = SphereAccessTokenSupplierFactory.of().createSupplierOfFixedToken(token);
             final SphereClient oneTokenClient = SphereClientFactory.of().createClient(apiConfig, fixedTokenSupplier);
             final int actual;
             try {

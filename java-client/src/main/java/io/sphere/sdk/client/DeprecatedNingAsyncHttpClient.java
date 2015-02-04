@@ -14,32 +14,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.apache.commons.lang3.StringUtils.*;
-
-final class NingAsyncHttpClient extends Base implements HttpClient {
+final class DeprecatedNingAsyncHttpClient extends Base implements HttpClient {
 
     private final SphereAccessTokenSupplier sphereAccessTokenSupplier;
     private final AsyncHttpClient asyncHttpClient;
-    private final String coreUrl;
-    private final String projectKey;
+    private final SphereApiConfig config;
 
-    public NingAsyncHttpClient(final SphereApiConfig config, final SphereAccessTokenSupplier sphereAccessTokenSupplier) {
+    public DeprecatedNingAsyncHttpClient(final SphereApiConfig config, final SphereAccessTokenSupplier sphereAccessTokenSupplier) {
+        this.config = config;
         asyncHttpClient = new AsyncHttpClient();
         this.sphereAccessTokenSupplier = sphereAccessTokenSupplier;
-        coreUrl = config.getApiUrl();
-        projectKey = config.getProjectKey();
     }
 
-    public NingAsyncHttpClient(final SphereClientConfig config) {
+    public DeprecatedNingAsyncHttpClient(final SphereClientConfig config) {
         asyncHttpClient = new AsyncHttpClient();
-        this.sphereAccessTokenSupplier = SphereAccessTokenSupplierImpl.createAndBeginRefreshInBackground(config, new OAuthClient(asyncHttpClient));
-        coreUrl = config.getApiUrl();
-        projectKey = config.getProjectKey();
+        this.sphereAccessTokenSupplier = null;
+        this.config = config;
     }
 
     @Override
-    public <T> CompletableFuture<HttpResponse> execute(final Requestable requestable) {
-        final Request request = asNingRequest(requestable);
+    public <T> CompletableFuture<HttpResponse> execute(final String baseUrl, final Requestable requestable) {
+        final Request request = asNingRequest(baseUrl, requestable);
         try {
             final CompletableFuture<Response> future = CompletableFutureUtils.wrap(asyncHttpClient.executeRequest(request));
             return future.thenApply((Response response) -> {
@@ -57,10 +52,10 @@ final class NingAsyncHttpClient extends Base implements HttpClient {
     }
 
     /* package scope for testing */
-    <T> Request asNingRequest(final Requestable requestable) {
+    <T> Request asNingRequest(final String baseUrl, final Requestable requestable) {
         final HttpRequest request = requestable.httpRequest();
         final RequestBuilder builder = new RequestBuilder()
-                .setUrl(stripEnd(coreUrl, "/") + "/" + projectKey + request.getPath())
+                .setUrl(baseUrl + request.getPath())
                 .setMethod(request.getHttpMethod().toString())
                 .setHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
                 .setHeader("Authorization", "Bearer " + sphereAccessTokenSupplier.get());
@@ -68,7 +63,9 @@ final class NingAsyncHttpClient extends Base implements HttpClient {
         if (request instanceof JsonBodyHttpRequest) {
             builder.setBodyEncoding(StandardCharsets.UTF_8.name())
                     .setBody(((JsonBodyHttpRequest) request).getBody());
-
+        } else if (request instanceof StringBodyHttpRequest) {
+            builder.setBodyEncoding(StandardCharsets.UTF_8.name())
+                    .setBody(((StringBodyHttpRequest) request).getBody());
         } else if (request instanceof FileBodyHttpRequest) {
             final FileBodyHttpRequest binRequest = (FileBodyHttpRequest) request;
             builder.setBody(binRequest.getBody());

@@ -3,6 +3,7 @@ package io.sphere.sdk.client;
 import java.util.Optional;
 
 import io.sphere.sdk.concurrent.JavaConcurrentUtils;
+import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.SphereInternalLogger;
 import io.sphere.sdk.utils.UrlUtils;
@@ -22,10 +23,6 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
      *  See {@link SphereAccessTokenSupplier}. */
     private static final long TOKEN_ABOUT_TO_EXPIRE_MS = 60*1000L;  // 1 minute //TODO use Typesafe Config
     public static final SphereInternalLogger AUTH_LOGGER = getLogger("oauth");
-    private final String tokenEndpoint;
-    private final String projectKey;
-    private final String clientId;
-    private final String clientSecret;
     private final OAuthClient oauthClient;
     private boolean isClosed = false;
 
@@ -41,20 +38,14 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
         return UrlUtils.combine(authEndpoint, "/oauth/token");
     }
 
-    public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, OAuthClient oauthClient) {
-        final String tokenEndpoint = tokenEndpoint(config.getAuthUrl());
-        final SphereAccessTokenSupplierImpl credentials = new SphereAccessTokenSupplierImpl(
-                oauthClient, tokenEndpoint, config.getProjectKey(), config.getClientId(), config.getClientSecret());
+    public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient) {
+        final SphereAccessTokenSupplierImpl credentials = new SphereAccessTokenSupplierImpl(config, httpClient);
         credentials.beginRefresh();
         return credentials;
     }
 
-    private SphereAccessTokenSupplierImpl(OAuthClient oauthClient, String tokenEndpoint, String projectKey, String clientId, String clientSecret) {
-        this.oauthClient  = oauthClient;
-        this.tokenEndpoint = tokenEndpoint;
-        this.projectKey = projectKey;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+    private SphereAccessTokenSupplierImpl(final SphereAuthConfig config, final HttpClient httpClient) {
+        oauthClient = OAuthClient.of(config, httpClient);
     }
 
     @Override
@@ -113,7 +104,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                     Tokens tokens = null;
                     try {
                         if (!isClosed) {
-                            final CompletableFuture<Tokens> tokensForClientFuture = oauthClient.getTokensForClient(tokenEndpoint, clientId, clientSecret, "manage_project:" + projectKey);
+                            final CompletableFuture<Tokens> tokensForClientFuture = oauthClient.getTokensForClient();
                             tokens = tokensForClientFuture.get();
                         }
                     } catch (Exception e) {

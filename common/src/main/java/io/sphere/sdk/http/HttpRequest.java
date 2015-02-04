@@ -19,10 +19,14 @@ public interface HttpRequest extends Requestable {
     }
 
     public static JsonBodyHttpRequest of(final HttpMethod httpMethod, final String path, final String body) {
-        return new JsonBodyHttpRequestImpl(httpMethod, path, body);
+        return new StringBodyHttpRequestImpl(httpMethod, path, body, HttpHeaders.of());
     }
 
     public static FileBodyHttpRequest of(final HttpMethod httpMethod, final String path, final File body, final String contentType) {
         return new FileBodyHttpRequestImpl(httpMethod, path, contentType, body);
+    }
+
+    public static StringBodyHttpRequest of(final HttpMethod httpMethod, final String path, final String body, final HttpHeaders headers) {
+        return new StringBodyHttpRequestImpl(httpMethod, path, body, headers);
     }
 }
