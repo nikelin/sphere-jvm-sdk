@@ -80,7 +80,7 @@ public class SphereClientFactory extends Base {
                 final HttpResponse httpResponse = function.apply(httpRequest);
                 if (sphereRequest.canHandleResponse(httpResponse)) {
                     final T resultObject = sphereRequest.resultMapper().apply(httpResponse);
-                    return CompletableFutureUtils.fullFilled(resultObject);
+                    return CompletableFutureUtils.fulfilled(resultObject);
                 } else {
                     throw new UnsupportedOperationException("TODO error case handling");
                 }
@@ -113,7 +113,7 @@ public class SphereClientFactory extends Base {
             @Override
             public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
                 final T result = (T) function.apply(sphereRequest.httpRequest());
-                return CompletableFutureUtils.fullFilled(result);
+                return CompletableFutureUtils.fulfilled(result);
             }
 
             @Override
