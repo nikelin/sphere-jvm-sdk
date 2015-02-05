@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 
 public interface HttpClient extends Closeable {
-    <T> CompletableFuture<HttpResponse> execute(String baseUrl, Requestable request);
+    <T> CompletableFuture<HttpResponse> execute(String baseUrl, HttpRequest request);
 
     void close();
 }

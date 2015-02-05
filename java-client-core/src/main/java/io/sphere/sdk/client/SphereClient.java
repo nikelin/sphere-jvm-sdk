@@ -16,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * Refer to <a href="../meta/SphereResources.html">resources</a> for known SPHERE.IO requests.
  *
- * @see io.sphere.sdk.client.SphereClientFactory
  */
 public interface SphereClient extends Closeable {
     <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest);

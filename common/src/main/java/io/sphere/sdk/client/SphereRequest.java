@@ -2,7 +2,6 @@ package io.sphere.sdk.client;
 
 import io.sphere.sdk.http.HttpRequest;
 import io.sphere.sdk.http.HttpResponse;
-import io.sphere.sdk.http.Requestable;
 
 import java.util.function.Function;
 
@@ -14,7 +13,7 @@ import java.util.function.Function;
 
  @param <T> the type which is returned in a successful http request.
  */
-public interface SphereRequest<T> extends Requestable {
+public interface SphereRequest<T> {
     /**
      Takes an http response and maps it into a Java object of type T.
      Before calling this method, check with {@link #canHandleResponse(io.sphere.sdk.http.HttpResponse)} if the response can be consumed.
@@ -23,7 +22,10 @@ public interface SphereRequest<T> extends Requestable {
      */
     Function<HttpResponse, T> resultMapper();
 
-    @Override
+    /**
+     Provides an http request, this does not include the execution of it.
+     @return http request
+     */
     HttpRequest httpRequest();
 
     /**

@@ -3,7 +3,7 @@ package io.sphere.sdk.utils;
 import io.sphere.sdk.http.HttpMethod;
 import io.sphere.sdk.http.HttpRequest;
 import io.sphere.sdk.http.HttpResponse;
-import io.sphere.sdk.http.Requestable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,8 +105,7 @@ public final class SphereInternalLogger {
         return this;
     }
 
-    public static SphereInternalLogger getLogger(final Requestable requestable) {
-        final HttpRequest httpRequest = requestable.httpRequest();
+    public static SphereInternalLogger getLogger(final HttpRequest httpRequest) {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         return getLogger(getFirstPathElement(httpRequest) + ".requests." + requestOrCommandScopeSegment(httpMethod));
     }

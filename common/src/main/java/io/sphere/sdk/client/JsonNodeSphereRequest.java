@@ -30,7 +30,7 @@ public class JsonNodeSphereRequest implements SphereRequest<Optional<JsonNode>> 
     @Override
     public HttpRequest httpRequest() {
         return body
-                .map(b -> HttpRequest.of(httpMethod, path, JsonUtils.toJson(b)).httpRequest())
+                .map(b -> (HttpRequest) HttpRequest.of(httpMethod, path, JsonUtils.toJson(b)))
                 .orElseGet(() -> HttpRequest.of(httpMethod, path));
     }
 

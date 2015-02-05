@@ -20,14 +20,14 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     }
 
     @Override
-    public <T> CompletableFuture<HttpResponse> execute(final String baseUrl, final Requestable requestable) {
-        final Request request = asNingRequest(baseUrl, requestable.httpRequest());
+    public <T> CompletableFuture<HttpResponse> execute(final String baseUrl, final HttpRequest httpRequest) {
+        final Request request = asNingRequest(baseUrl, httpRequest);
         try {
             final CompletableFuture<Response> future = wrap(asyncHttpClient.executeRequest(request));
             return future.thenApply((Response response) -> {
                     final byte[] responseBodyAsBytes = getResponseBodyAsBytes(response);
                     Optional<byte[]> body = responseBodyAsBytes.length > 0 ? Optional.of(responseBodyAsBytes) : Optional.empty();
-                    return HttpResponse.of(response.getStatusCode(), body, Optional.of(requestable.httpRequest()));
+                    return HttpResponse.of(response.getStatusCode(), body, Optional.of(httpRequest));
             });
         } catch (final IOException e) {
             throw new HttpException(e);

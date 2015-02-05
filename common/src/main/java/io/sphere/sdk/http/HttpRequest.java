@@ -2,17 +2,12 @@ package io.sphere.sdk.http;
 
 import java.io.File;
 
-public interface HttpRequest extends Requestable {
+public interface HttpRequest {
     HttpMethod getHttpMethod();
 
     String getPath();
 
     HttpHeaders getHeaders();
-
-    @Override
-    default HttpRequest httpRequest() {
-        return this;
-    }
 
     public static HttpRequest of(final HttpMethod httpMethod, final String path) {
         return new HttpRequestImpl(httpMethod, path);

@@ -33,7 +33,7 @@ final class SphereClientImpl extends Base implements SphereClient {
     @Override
     public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
         final SphereRequest<T> usedClientRequest = new CachedHttpRequestSphereRequest<>(sphereRequest);
-        final SphereInternalLogger logger = getLogger(usedClientRequest);
+        final SphereInternalLogger logger = getLogger(usedClientRequest.httpRequest());
         logger.debug(() -> usedClientRequest);
         logger.trace(() -> {
             final String output;
@@ -46,7 +46,7 @@ final class SphereClientImpl extends Base implements SphereClient {
             return output;
         });
         return httpClient.
-                execute(stripEnd(config.getApiUrl(), "/") + "/" + config.getProjectKey(), usedClientRequest).
+                execute(stripEnd(config.getApiUrl(), "/") + "/" + config.getProjectKey(), usedClientRequest.httpRequest()).
                 thenApply(preProcess(usedClientRequest));
     }
 
