@@ -20,8 +20,8 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     }
 
     @Override
-    public <T> CompletableFuture<HttpResponse> execute(final String baseUrl, final HttpRequest httpRequest) {
-        final Request request = asNingRequest(baseUrl, httpRequest);
+    public CompletableFuture<HttpResponse> execute(final HttpRequest httpRequest) {
+        final Request request = asNingRequest(httpRequest);
         try {
             final CompletableFuture<Response> future = wrap(asyncHttpClient.executeRequest(request));
             return future.thenApply((Response response) -> {
@@ -43,23 +43,21 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     }
 
     /* package scope for testing */
-    <T> Request asNingRequest(final String baseUrl, final HttpRequest request) {
+    <T> Request asNingRequest(final HttpRequest request) {
         final RequestBuilder builder = new RequestBuilder()
-                .setUrl(baseUrl + request.getPath())
+                .setUrl(request.getUrl())
                 .setMethod(request.getHttpMethod().toString());
 
         request.getHeaders().getHeadersAsMap().forEach((name, value) -> builder.setHeader(name, value));
 
-        if (request instanceof JsonBodyHttpRequest) {
-            builder.setBodyEncoding(StandardCharsets.UTF_8.name())
-                    .setBody(((JsonBodyHttpRequest) request).getBody());
-        } else if (request instanceof StringBodyHttpRequest) {
-            builder.setBodyEncoding(StandardCharsets.UTF_8.name())
-                    .setBody(((StringBodyHttpRequest) request).getBody());
-        } else if (request instanceof FileBodyHttpRequest) {
-            final FileBodyHttpRequest binRequest = (FileBodyHttpRequest) request;
-            builder.setBody(binRequest.getBody());
-        }
+        request.getBody().ifPresent(body -> {
+            if (body instanceof StringHttpRequestBody) {
+                builder.setBodyEncoding(StandardCharsets.UTF_8.name())
+                        .setBody(((StringHttpRequestBody) request).getBody());
+            } else if (body instanceof FileHttpRequestBody) {
+                builder.setBody(((FileHttpRequestBody) body).getBody());
+            }
+        });
         return builder.build();
     }
 

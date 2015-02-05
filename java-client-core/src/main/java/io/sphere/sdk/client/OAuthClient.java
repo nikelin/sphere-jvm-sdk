@@ -24,8 +24,8 @@ final class OAuthClient {
         final String body = String.format("grant_type=client_credentials&scope=manage_project:%s", config.getProjectKey());
         try {
             final String urlEncodedBody = URLEncoder.encode(body, "UTF-8");
-            final StringBodyHttpRequest request = HttpRequest.of(POST, "/oauth/token", urlEncodedBody, HttpHeaders.of("Content-Type", "application/x-www-form-urlencoded"));
-            return httpClient.execute(config.getAuthUrl(), request).thenApply(OAuthClient::parseResponse);
+            final HttpRequest request = HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", "application/x-www-form-urlencoded", urlEncodedBody);
+            return httpClient.execute(request).thenApply(OAuthClient::parseResponse);
         } catch (final UnsupportedEncodingException e) {
             throw new AuthorizationException(e);
         }

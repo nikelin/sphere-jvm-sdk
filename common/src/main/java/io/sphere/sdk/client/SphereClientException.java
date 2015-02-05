@@ -4,12 +4,8 @@ package io.sphere.sdk.client;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import io.sphere.sdk.http.FileBodyHttpRequest;
-import io.sphere.sdk.http.JsonBodyHttpRequest;
+import io.sphere.sdk.http.*;
 import io.sphere.sdk.meta.BuildInfo;
-import io.sphere.sdk.http.HttpRequest;
-import io.sphere.sdk.http.HttpResponse;
-import io.sphere.sdk.utils.functional.FunctionalUtils;
 import io.sphere.sdk.utils.JsonUtils;
 
 import java.util.Date;
@@ -85,17 +81,23 @@ public class SphereClientException extends RuntimeException {
                 append("===== END EXCEPTION OUTPUT =====").toString();
     }
 
-    public void setUnderlyingHttpRequest(final HttpRequest httpRequest) {
-        final String body = debugOutputFor(httpRequest);
-        final String requestAsString = new StringBuilder(httpRequest.getHttpMethod().toString()).append(" ").append(httpRequest.getPath()).append("\n").append(body).toString();
+    public void setUnderlyingHttpRequest(final HttpRequestIntent httpRequestIntent) {
+        final String body = debugOutputFor(httpRequestIntent);
+        final String requestAsString = new StringBuilder(httpRequestIntent.getHttpMethod().toString()).append(" ").append(httpRequestIntent.getPath()).append("\n").append(body).toString();
         setUnderlyingHttpRequest(requestAsString);
     }
 
-    private String debugOutputFor(final HttpRequest httpRequest) {
-        return FunctionalUtils.<String>patternMatching(httpRequest)
-                .when(JsonBodyHttpRequest.class, x -> JsonUtils.prettyPrintJsonStringSecureWithFallback(x.getBody()))
-                .when(FileBodyHttpRequest.class, x -> "<binary request body>")
-                .toOption().orElse("");
+    private String debugOutputFor(final HttpRequestIntent httpRequestIntent) {
+        final String output;
+        if (httpRequestIntent.hasJsonBody()) {
+            final StringHttpRequestBody httpRequestBody = (StringHttpRequestBody) httpRequestIntent.getBody().get();
+            output = JsonUtils.prettyPrintJsonStringSecureWithFallback(httpRequestBody.getBody());
+        } else if(httpRequestIntent.getBody().isPresent()) {
+            output = "<binary request body>";
+        } else {
+            output = "";
+        }
+        return output;
     }
 
     public void setUnderlyingHttpResponse(final HttpResponse httpResponse) {

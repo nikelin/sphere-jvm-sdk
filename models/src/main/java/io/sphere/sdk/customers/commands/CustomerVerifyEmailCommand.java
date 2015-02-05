@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.sphere.sdk.commands.CommandImpl;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.customers.CustomerToken;
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.models.Versioned;
 import io.sphere.sdk.utils.JsonUtils;
 
@@ -34,8 +34,8 @@ public class CustomerVerifyEmailCommand extends CommandImpl<Customer> {
     }
 
     @Override
-    public HttpRequest httpRequest() {
-        return HttpRequest.of(POST, "/customers/email/confirm", JsonUtils.toJson(this));
+    public HttpRequestIntent httpRequestIntent() {
+        return HttpRequestIntent.ofJson(POST, "/customers/email/confirm", JsonUtils.toJson(this));
     }
 
     public static CustomerVerifyEmailCommand of(final Versioned<Customer> customer, final String tokenValue) {

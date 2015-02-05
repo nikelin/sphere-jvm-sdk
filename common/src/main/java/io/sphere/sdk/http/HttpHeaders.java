@@ -13,9 +13,7 @@ public class HttpHeaders extends Base {
     private final Map<String, String> headers;
 
     private HttpHeaders(final Map<String, String> headers) {
-        final Map<String, String> copy = copyOf(headers);
-        copy.put("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version());
-        this.headers = unmodifiableMap(copy);
+        this.headers = unmodifiableMap(headers);
     }
 
     private HttpHeaders(final String key, final String value) {
@@ -36,5 +34,11 @@ public class HttpHeaders extends Base {
 
     public Map<String, String> getHeadersAsMap() {
         return headers;
+    }
+
+    public HttpHeaders plus(final String key, final String value) {
+        final Map<String, String> copy = copyOf(headers);
+        copy.put(key, value + BuildInfo.version());
+        return new HttpHeaders(copy);
     }
 }

@@ -6,7 +6,7 @@ import io.sphere.sdk.commands.CommandImpl;
 import io.sphere.sdk.commands.DeleteCommand;
 import io.sphere.sdk.customobjects.CustomObject;
 import io.sphere.sdk.http.HttpMethod;
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 
 import static java.lang.String.format;
 
@@ -26,8 +26,8 @@ public final class CustomObjectDeleteByContainerAndKeyCommand<T extends CustomOb
     }
 
     @Override
-    public HttpRequest httpRequest() {
-        return HttpRequest.of(HttpMethod.DELETE, CustomObjectsEndpoint.PATH + format("/%s/%s", container, key));
+    public HttpRequestIntent httpRequestIntent() {
+        return HttpRequestIntent.of(HttpMethod.DELETE, CustomObjectsEndpoint.PATH + format("/%s/%s", container, key));
     }
 
     private CustomObjectDeleteByContainerAndKeyCommand(final String container, final String key, final TypeReference<T> typeReference) {

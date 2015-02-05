@@ -123,7 +123,7 @@ public final class SphereInternalLogger {
     }
 
     private static String getFirstPathElement(final HttpRequest httpRequest) {
-        final String path = httpRequest.getPath();
+        final String path = httpRequest.getUrl();
         final String leadingSlashRemoved = path.substring(1);
         return substringBefore(substringBefore(leadingSlashRemoved, "/"), "?");
     }

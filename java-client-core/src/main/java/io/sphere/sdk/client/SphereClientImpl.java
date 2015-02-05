@@ -1,9 +1,8 @@
 package io.sphere.sdk.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sphere.sdk.http.HttpClient;
-import io.sphere.sdk.http.HttpResponse;
-import io.sphere.sdk.http.JsonBodyHttpRequest;
+import io.sphere.sdk.http.*;
+import io.sphere.sdk.meta.BuildInfo;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.JsonUtils;
 import io.sphere.sdk.utils.SphereIOUtils;
@@ -15,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static io.sphere.sdk.utils.SphereInternalLogger.getLogger;
-import static org.apache.commons.lang3.StringUtils.stripEnd;
 
 final class SphereClientImpl extends Base implements SphereClient {
     private final ObjectMapper objectMapper = JsonUtils.newObjectMapper();
@@ -33,12 +31,19 @@ final class SphereClientImpl extends Base implements SphereClient {
     @Override
     public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
         final SphereRequest<T> usedClientRequest = new CachedHttpRequestSphereRequest<>(sphereRequest);
-        final SphereInternalLogger logger = getLogger(usedClientRequest.httpRequest());
+        final HttpRequest httpRequest = usedClientRequest
+                .httpRequestIntent()
+                .plusHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
+                .plusHeader("Authorization", "Bearer " + tokenSupplier.get())
+                .prefixPath(config.getProjectKey())
+                .toHttpRequest(config.getApiUrl());
+
+        final SphereInternalLogger logger = getLogger(httpRequest);
         logger.debug(() -> usedClientRequest);
         logger.trace(() -> {
             final String output;
-            if (usedClientRequest.httpRequest() instanceof JsonBodyHttpRequest) {
-                final String unformattedJson = ((JsonBodyHttpRequest) usedClientRequest.httpRequest()).getBody();
+            if (httpRequest.getBody().isPresent()) {
+                final String unformattedJson = ((StringHttpRequestBody) httpRequest).getBody();
                 output = "send: " + unformattedJson + "\nformatted: " + JsonUtils.prettyPrintJsonStringSecure(unformattedJson);
             } else {
                 output = "no request body present";
@@ -46,7 +51,7 @@ final class SphereClientImpl extends Base implements SphereClient {
             return output;
         });
         return httpClient.
-                execute(stripEnd(config.getApiUrl(), "/") + "/" + config.getProjectKey(), usedClientRequest.httpRequest()).
+                execute(httpRequest).
                 thenApply(preProcess(usedClientRequest));
     }
 
@@ -93,11 +98,11 @@ final class SphereClientImpl extends Base implements SphereClient {
         }
         final SphereBackendException exception;
         if (httpResponse.getStatusCode() == 409) {
-            exception = new ConcurrentModificationException(sphereRequest.httpRequest().getPath(), errorResponse);
+            exception = new ConcurrentModificationException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else if(!errorResponse.getErrors().isEmpty() && errorResponse.getErrors().get(0).getCode().equals("ReferenceExists")) {
-            exception = new ReferenceExistsException(sphereRequest.httpRequest().getPath(), errorResponse);
+            exception = new ReferenceExistsException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else {
-            exception = new SphereBackendException(sphereRequest.httpRequest().getPath(), errorResponse);
+            exception = new SphereBackendException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         }
         fillExceptionWithData(httpResponse, exception, sphereRequest);
         throw exception;
@@ -117,7 +122,7 @@ final class SphereClientImpl extends Base implements SphereClient {
 
     private <T> void fillExceptionWithData(final HttpResponse httpResponse, final SphereException exception, final SphereRequest<T> sphereRequest) {
         exception.setSphereRequest(sphereRequest.toString());
-        exception.setUnderlyingHttpRequest(sphereRequest.httpRequest());
+        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent());
         exception.setUnderlyingHttpResponse(httpResponse);
         exception.setProjectKey(config.getProjectKey());
     }

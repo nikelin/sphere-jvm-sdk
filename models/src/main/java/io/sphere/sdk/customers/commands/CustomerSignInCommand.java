@@ -6,7 +6,7 @@ import io.sphere.sdk.client.SphereException;
 import io.sphere.sdk.commands.CommandImpl;
 import io.sphere.sdk.customers.CustomerSignInResult;
 import io.sphere.sdk.customers.InvalidCurrentPasswordException;
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.utils.JsonUtils;
 
@@ -47,8 +47,8 @@ public class CustomerSignInCommand extends CommandImpl<CustomerSignInResult> {
     }
 
     @Override
-    public HttpRequest httpRequest() {
-        return HttpRequest.of(POST, "/login", JsonUtils.toJson(this));
+    public HttpRequestIntent httpRequestIntent() {
+        return HttpRequestIntent.ofJson(POST, "/login", JsonUtils.toJson(this));
     }
 
     @Override

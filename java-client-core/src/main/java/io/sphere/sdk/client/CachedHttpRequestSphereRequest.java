@@ -1,6 +1,6 @@
 package io.sphere.sdk.client;
 
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.models.Base;
 
@@ -8,11 +8,11 @@ import java.util.function.Function;
 
 final class CachedHttpRequestSphereRequest<T> extends Base implements SphereRequest<T> {
     private final SphereRequest<T> delegate;
-    private final HttpRequest httpRequest;
+    private final HttpRequestIntent httpRequest;
 
     CachedHttpRequestSphereRequest(final SphereRequest<T> delegate) {
         this.delegate = delegate;
-        this.httpRequest = delegate.httpRequest();
+        this.httpRequest = delegate.httpRequestIntent();
     }
 
     @Override
@@ -21,7 +21,7 @@ final class CachedHttpRequestSphereRequest<T> extends Base implements SphereRequ
     }
 
     @Override
-    public HttpRequest httpRequest() {
+    public HttpRequestIntent httpRequestIntent() {
         return httpRequest;
     }
 

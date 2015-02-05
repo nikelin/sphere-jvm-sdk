@@ -1,27 +1,21 @@
 package io.sphere.sdk.http;
 
-import java.io.File;
+import java.util.Optional;
 
 public interface HttpRequest {
     HttpMethod getHttpMethod();
 
-    String getPath();
+    String getUrl();
 
     HttpHeaders getHeaders();
 
-    public static HttpRequest of(final HttpMethod httpMethod, final String path) {
-        return new HttpRequestImpl(httpMethod, path);
+    Optional<HttpRequestBody> getBody();
+
+    static HttpRequest of(final HttpMethod httpMethod, final String url, final String contentType, final String body) {
+        return of(httpMethod, url, HttpHeaders.of("Content-Type", contentType), Optional.of(StringHttpRequestBody.of(body)));
     }
 
-    public static JsonBodyHttpRequest of(final HttpMethod httpMethod, final String path, final String body) {
-        return new StringBodyHttpRequestImpl(httpMethod, path, body, HttpHeaders.of());
-    }
-
-    public static FileBodyHttpRequest of(final HttpMethod httpMethod, final String path, final File body, final String contentType) {
-        return new FileBodyHttpRequestImpl(httpMethod, path, contentType, body);
-    }
-
-    public static StringBodyHttpRequest of(final HttpMethod httpMethod, final String path, final String body, final HttpHeaders headers) {
-        return new StringBodyHttpRequestImpl(httpMethod, path, body, headers);
+    static HttpRequest of(final HttpMethod httpMethod, final String url, final HttpHeaders headers, final Optional<HttpRequestBody> body) {
+        return new HttpRequestImpl(httpMethod, url, headers, body);
     }
 }

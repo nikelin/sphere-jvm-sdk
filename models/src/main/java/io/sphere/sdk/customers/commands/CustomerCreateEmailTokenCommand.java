@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.sphere.sdk.commands.CommandImpl;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.customers.CustomerToken;
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.models.Versioned;
 import io.sphere.sdk.utils.JsonUtils;
 
@@ -48,7 +48,7 @@ public class CustomerCreateEmailTokenCommand extends CommandImpl<CustomerToken> 
     }
 
     @Override
-    public HttpRequest httpRequest() {
-        return HttpRequest.of(POST, "/customers/email-token", JsonUtils.toJson(this));
+    public HttpRequestIntent httpRequestIntent() {
+        return HttpRequestIntent.ofJson(POST, "/customers/email-token", JsonUtils.toJson(this));
     }
 }

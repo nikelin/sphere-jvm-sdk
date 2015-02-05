@@ -3,6 +3,7 @@ package io.sphere.sdk.categories;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.queries.*;
 import io.sphere.sdk.http.HttpMethod;
@@ -28,8 +29,8 @@ public class CategoryByNameQuery extends Base implements Query<Category> {
     }
 
     @Override
-    public HttpRequest httpRequest() {
-        return HttpRequest.of(HttpMethod.GET, "/categories" + urlEncode("name(" + locale.toLanguageTag() + "=\"" + StringQuerySortingModel.escape(name) + "\")"));
+    public HttpRequestIntent httpRequestIntent() {
+        return HttpRequestIntent.of(HttpMethod.GET, "/categories" + urlEncode("name(" + locale.toLanguageTag() + "=\"" + StringQuerySortingModel.escape(name) + "\")"));
     }
 
     @Override

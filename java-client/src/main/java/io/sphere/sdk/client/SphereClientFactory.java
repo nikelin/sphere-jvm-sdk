@@ -1,7 +1,7 @@
 package io.sphere.sdk.client;
 
 import io.sphere.sdk.http.HttpClient;
-import io.sphere.sdk.http.HttpRequest;
+import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.models.Base;
 
@@ -72,11 +72,11 @@ public class SphereClientFactory extends Base {
      * @param function a function which returns a matching object for a SPHERE.IO request.
      * @return sphere client test double
      */
-    public SphereClient createHttpTestDouble(final Function<HttpRequest, HttpResponse> function) {
+    public SphereClient createHttpTestDouble(final Function<HttpRequestIntent, HttpResponse> function) {
         return new SphereClient() {
             @Override
             public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
-                final HttpRequest httpRequest = sphereRequest.httpRequest();
+                final HttpRequestIntent httpRequest = sphereRequest.httpRequestIntent();
                 final HttpResponse httpResponse = function.apply(httpRequest);
                 if (sphereRequest.canHandleResponse(httpResponse)) {
                     final T resultObject = sphereRequest.resultMapper().apply(httpResponse);
@@ -108,11 +108,11 @@ public class SphereClientFactory extends Base {
      * @return sphere client test double
      */
     @SuppressWarnings("unchecked")
-    public SphereClient createObjectTestDouble(final Function<HttpRequest, Object> function) {
+    public SphereClient createObjectTestDouble(final Function<HttpRequestIntent, Object> function) {
         return new SphereClient() {
             @Override
             public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
-                final T result = (T) function.apply(sphereRequest.httpRequest());
+                final T result = (T) function.apply(sphereRequest.httpRequestIntent());
                 return CompletableFutureUtils.fulfilled(result);
             }
 
