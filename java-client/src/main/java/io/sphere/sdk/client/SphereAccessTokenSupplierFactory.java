@@ -1,5 +1,6 @@
 package io.sphere.sdk.client;
 
+import com.ning.http.client.AsyncHttpClient;
 import io.sphere.sdk.http.HttpClient;
 
 public final class SphereAccessTokenSupplierFactory {
@@ -18,7 +19,7 @@ public final class SphereAccessTokenSupplierFactory {
      * @return token service
      */
     public SphereAccessTokenSupplier createSupplierOfFixedToken(final String token) {
-        return new SphereFixedAccessTokenSupplierImpl(token);
+        return SphereAccessTokenSupplier.ofConstantToken(token);
     }
 
     /**
@@ -28,10 +29,20 @@ public final class SphereAccessTokenSupplierFactory {
      * @return token service
      */
     public SphereAccessTokenSupplier createSupplierOfAutoRefresh(final SphereAuthConfig config) {
-        return SphereAccessTokenSupplierImpl.createAndBeginRefreshInBackground(config, defaultHttpClient());
+        return SphereAccessTokenSupplier.ofAutoRefresh(config, defaultHttpClient(), true);
     }
 
-    //TODO put this into the a base class
+    /**
+     * Provides a token generator which tries to always provide a valid token.
+     *
+     * @param config the configuration to fetch a token
+     * @param asyncHttpClient underlying client for http traffic
+     * @return token service
+     */
+    public SphereAccessTokenSupplier createSupplierOfAutoRefresh(final SphereAuthConfig config, final AsyncHttpClient asyncHttpClient) {
+        return SphereAccessTokenSupplier.ofAutoRefresh(config, NingAsyncHttpClientAdapter.of(asyncHttpClient), true);
+    }
+
     private HttpClient defaultHttpClient() {
         return NingAsyncHttpClientAdapter.of();
     }

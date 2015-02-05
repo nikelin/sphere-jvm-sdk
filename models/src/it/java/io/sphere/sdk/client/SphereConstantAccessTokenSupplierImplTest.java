@@ -8,24 +8,19 @@ import org.junit.Test;
 import static io.sphere.sdk.categories.CategoryFixtures.withCategory;
 import static org.fest.assertions.Assertions.assertThat;
 
-public class SphereFixedAccessTokenSupplierImplTest extends IntegrationTest {
+public class SphereConstantAccessTokenSupplierImplTest extends IntegrationTest {
     @Test
     public void requestsArePossible() throws Exception {
         withCategory(client(), category -> {
             final CategoryQuery categoryQuery = CategoryQuery.of();
             final int expected = client().execute(categoryQuery).getTotal();
             final SphereApiConfig apiConfig = SphereApiConfig.of(projectKey(), apiUrl());
-            final SphereAccessTokenSupplier refreshSupplier = SphereAccessTokenSupplierFactory.of().createSupplierOfAutoRefresh(SphereAuthConfig.of(projectKey(), clientId(), clientSecret(), authUrl()));
-            final String token = refreshSupplier.get();
-            refreshSupplier.close();
-            final SphereAccessTokenSupplier fixedTokenSupplier = SphereAccessTokenSupplierFactory.of().createSupplierOfFixedToken(token);
+
+            final SphereAuthConfig authConfig = SphereAuthConfig.of(projectKey(), clientId(), clientSecret(), authUrl());
+
+            final SphereAccessTokenSupplier fixedTokenSupplier = SphereAccessTokenSupplier.ofOneTimeFetchingToken(authConfig, NingAsyncHttpClientAdapter.of(), true);
             final SphereClient oneTokenClient = SphereClientFactory.of().createClient(apiConfig, fixedTokenSupplier);
-            final int actual;
-            try {
-                actual = oneTokenClient.execute(categoryQuery).get().getTotal();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            final int actual = oneTokenClient.execute(categoryQuery).join().getTotal();
             assertThat(actual).isEqualTo(expected);
         });
     }

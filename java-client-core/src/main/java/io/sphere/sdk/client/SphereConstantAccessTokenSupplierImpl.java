@@ -2,10 +2,10 @@ package io.sphere.sdk.client;
 
 import io.sphere.sdk.models.Base;
 
-final class SphereFixedAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier {
+final class SphereConstantAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier {
     private final String token;
 
-    SphereFixedAccessTokenSupplierImpl(final String token) {
+    SphereConstantAccessTokenSupplierImpl(final String token) {
         this.token = token;
     }
 

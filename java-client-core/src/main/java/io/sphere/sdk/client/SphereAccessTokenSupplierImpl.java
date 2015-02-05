@@ -24,6 +24,8 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
     private static final long TOKEN_ABOUT_TO_EXPIRE_MS = 60*1000L;  // 1 minute //TODO use Typesafe Config
     public static final SphereInternalLogger AUTH_LOGGER = getLogger("oauth");
     private final OAuthClient oauthClient;
+    private final HttpClient httpClient;
+    private final boolean closeHttpClient;
     private boolean isClosed = false;
 
     private final Object accessTokenLock = new Object();
@@ -38,13 +40,15 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
         return UrlUtils.combine(authEndpoint, "/oauth/token");
     }
 
-    public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient) {
-        final SphereAccessTokenSupplierImpl credentials = new SphereAccessTokenSupplierImpl(config, httpClient);
+    public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
+        final SphereAccessTokenSupplierImpl credentials = new SphereAccessTokenSupplierImpl(config, httpClient, closeHttpClient);
         credentials.beginRefresh();
         return credentials;
     }
 
-    private SphereAccessTokenSupplierImpl(final SphereAuthConfig config, final HttpClient httpClient) {
+    private SphereAccessTokenSupplierImpl(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
+        this.httpClient = httpClient;
+        this.closeHttpClient = closeHttpClient;
         oauthClient = OAuthClient.of(config, httpClient);
     }
 
@@ -167,6 +171,9 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
     public void close() {
         refreshExecutor.shutdownNow();
         refreshTimer.cancel();
+        if (closeHttpClient) {
+            httpClient.close();
+        }
         isClosed = true;
     }
 }
