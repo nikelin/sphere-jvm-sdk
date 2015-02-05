@@ -35,7 +35,7 @@ final class SphereClientImpl extends Base implements SphereClient {
                 .httpRequestIntent()
                 .plusHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
                 .plusHeader("Authorization", "Bearer " + tokenSupplier.get())
-                .prefixPath(config.getProjectKey())
+                .prefixPath("/" + config.getProjectKey())
                 .toHttpRequest(config.getApiUrl());
 
         final SphereInternalLogger logger = getLogger(httpRequest);
@@ -43,7 +43,7 @@ final class SphereClientImpl extends Base implements SphereClient {
         logger.trace(() -> {
             final String output;
             if (httpRequest.getBody().isPresent()) {
-                final String unformattedJson = ((StringHttpRequestBody) httpRequest).getBody();
+                final String unformattedJson = ((StringHttpRequestBody) httpRequest).getUnderlying();
                 output = "send: " + unformattedJson + "\nformatted: " + JsonUtils.prettyPrintJsonStringSecure(unformattedJson);
             } else {
                 output = "no request body present";

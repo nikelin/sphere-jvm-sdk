@@ -13,7 +13,8 @@ public abstract class IntegrationTest {
         if (client == null) {
             final SphereClientFactory factory = SphereClientFactory.of();
             final SphereClientConfig config = SphereClientConfig.of(projectKey(), clientId(), clientSecret(), authUrl(), apiUrl());
-            final SphereClient underlying = factory.createClient(config);
+            final SphereAccessTokenSupplier tokenSupplier = SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
+            final SphereClient underlying = factory.createClient(config, tokenSupplier);
             client = new TestClient(underlying);
         }
         return client;

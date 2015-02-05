@@ -91,7 +91,7 @@ public class SphereClientException extends RuntimeException {
         final String output;
         if (httpRequestIntent.hasJsonBody()) {
             final StringHttpRequestBody httpRequestBody = (StringHttpRequestBody) httpRequestIntent.getBody().get();
-            output = JsonUtils.prettyPrintJsonStringSecureWithFallback(httpRequestBody.getBody());
+            output = JsonUtils.prettyPrintJsonStringSecureWithFallback(httpRequestBody.getUnderlying());
         } else if(httpRequestIntent.getBody().isPresent()) {
             output = "<binary request body>";
         } else {

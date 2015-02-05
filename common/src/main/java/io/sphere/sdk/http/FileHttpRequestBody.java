@@ -15,7 +15,7 @@ public class FileHttpRequestBody extends Base implements HttpRequestBody {
         return new FileHttpRequestBody(body);
     }
 
-    public File getBody() {
+    public File getUnderlying() {
         return body;
     }
 }

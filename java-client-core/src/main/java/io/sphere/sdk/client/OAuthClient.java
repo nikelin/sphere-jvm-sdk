@@ -1,13 +1,16 @@
 package io.sphere.sdk.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import io.sphere.sdk.http.*;
 import io.sphere.sdk.utils.JsonUtils;
+import io.sphere.sdk.utils.MapUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static io.sphere.sdk.http.HttpMethod.POST;
+import static java.lang.String.format;
 
 final class OAuthClient {
     private final HttpClient httpClient;
@@ -21,12 +24,17 @@ final class OAuthClient {
     /** Asynchronously gets access and refresh tokens for given user from the authorization server
      *  using the Resource owner credentials flow. */
     public CompletableFuture<Tokens> getTokensForClient() {
-        final String body = String.format("grant_type=client_credentials&scope=manage_project:%s", config.getProjectKey());
         try {
-            final String urlEncodedBody = URLEncoder.encode(body, "UTF-8");
-            final HttpRequest request = HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", "application/x-www-form-urlencoded", urlEncodedBody);
+            final String usernamePassword = format("%s:%s", config.getClientId(), config.getClientSecret());
+            final String encodedString = Base64.getEncoder().encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
+            final HttpHeaders httpHeaders = HttpHeaders
+                    .of("Authorization", "Basic " + encodedString)
+                            .plus("Content-Type", "application/x-www-form-urlencoded");
+            final FormUrlEncodedHttpRequestBody body = FormUrlEncodedHttpRequestBody.of(MapUtils.mapOf("grant_type", "client_credentials", "scope", format("manage_project:%s", config.getProjectKey())));
+            final HttpRequest request = HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", httpHeaders, Optional.of(body));
+
             return httpClient.execute(request).thenApply(OAuthClient::parseResponse);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (JsonException e) {
             throw new AuthorizationException(e);
         }
     }
@@ -36,7 +44,7 @@ final class OAuthClient {
      *  @param response Response from the authorization service.
      */
     private static Tokens parseResponse(final HttpResponse response) {
-        if (response.getStatusCode() != 200 && !response.getResponseBody().isPresent()) {
+        if (response.getStatusCode() != 200 || !response.getResponseBody().isPresent()) {
             throw new AuthorizationException(response.toString());
         }
         return JsonUtils.readObject(Tokens.typeReference(), response.getResponseBody().get());

@@ -2,6 +2,7 @@ package io.sphere.sdk.http;
 
 import io.sphere.sdk.models.Base;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -12,12 +13,14 @@ import static java.lang.String.format;
 class HttpResponseImpl extends Base implements HttpResponse {
     private final int statusCode;
     private final Optional<byte[]> responseBody;
+    private final Optional<String> bodyAsStringForDebugging;
     private final Optional<HttpRequest> associatedRequest;
 
     HttpResponseImpl(final int statusCode, final Optional<byte[]> responseBody, final Optional<HttpRequest> associatedRequest) {
         this.statusCode = statusCode;
         this.responseBody = responseBody;
         this.associatedRequest = associatedRequest;
+        this.bodyAsStringForDebugging = statusCode >= 400 ? responseBody.map(b -> new String(b, StandardCharsets.UTF_8)) : Optional.<String>empty();
     }
 
     @Override

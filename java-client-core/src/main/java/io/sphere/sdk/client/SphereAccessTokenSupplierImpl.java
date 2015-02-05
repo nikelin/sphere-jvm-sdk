@@ -5,6 +5,7 @@ import java.util.Optional;
 import io.sphere.sdk.concurrent.JavaConcurrentUtils;
 import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.models.Base;
+import io.sphere.sdk.utils.SphereIOUtils;
 import io.sphere.sdk.utils.SphereInternalLogger;
 import io.sphere.sdk.utils.UrlUtils;
 
@@ -21,7 +22,7 @@ import static io.sphere.sdk.utils.SphereInternalLogger.*;
 final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier {
     /** Amount of time indicating that an OAuth token is about to expire and should be refreshed.
      *  See {@link SphereAccessTokenSupplier}. */
-    private static final long TOKEN_ABOUT_TO_EXPIRE_MS = 60*1000L;  // 1 minute //TODO use Typesafe Config
+    private static final long TOKEN_ABOUT_TO_EXPIRE_MS = 60*1000L;  // 1 minute
     public static final SphereInternalLogger AUTH_LOGGER = getLogger("oauth");
     private final OAuthClient oauthClient;
     private final HttpClient httpClient;
@@ -35,10 +36,6 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
     /** Allows at most one refresh operation running in the background. */
     private final ThreadPoolExecutor refreshExecutor = JavaConcurrentUtils.singleTaskExecutor("Sphere-ClientCredentials-refresh");
     private final Timer refreshTimer = new Timer("Sphere-ClientCredentials-refreshTimer", true);
-
-    public static String tokenEndpoint(String authEndpoint) {
-        return UrlUtils.combine(authEndpoint, "/oauth/token");
-    }
 
     public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
         final SphereAccessTokenSupplierImpl credentials = new SphereAccessTokenSupplierImpl(config, httpClient, closeHttpClient);
@@ -172,7 +169,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
         refreshExecutor.shutdownNow();
         refreshTimer.cancel();
         if (closeHttpClient) {
-            httpClient.close();
+            SphereIOUtils.closeQuietly(httpClient);
         }
         isClosed = true;
     }

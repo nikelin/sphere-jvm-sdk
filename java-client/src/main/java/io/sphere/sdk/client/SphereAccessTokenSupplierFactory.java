@@ -43,6 +43,10 @@ public final class SphereAccessTokenSupplierFactory {
         return SphereAccessTokenSupplier.ofAutoRefresh(config, NingAsyncHttpClientAdapter.of(asyncHttpClient), true);
     }
 
+    public SphereAccessTokenSupplier createSupplierOfOneTimeFetchingToken(final SphereAuthConfig config) {
+        return SphereAccessTokenSupplier.ofOneTimeFetchingToken(config, defaultHttpClient(), true);
+    }
+
     private HttpClient defaultHttpClient() {
         return NingAsyncHttpClientAdapter.of();
     }

@@ -52,13 +52,16 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
 
         request.getBody().ifPresent(body -> {
             if (body instanceof StringHttpRequestBody) {
-                builder.setBodyEncoding(StandardCharsets.UTF_8.name())
-                        .setBody(((StringHttpRequestBody) request).getBody());
+                final String bodyAsString = ((StringHttpRequestBody) body).getUnderlying();
+                builder.setBodyEncoding(StandardCharsets.UTF_8.name()).setBody(bodyAsString);
             } else if (body instanceof FileHttpRequestBody) {
-                builder.setBody(((FileHttpRequestBody) body).getBody());
+                builder.setBody(((FileHttpRequestBody) body).getUnderlying());
+            } else if (body instanceof FormUrlEncodedHttpRequestBody) {
+                ((FormUrlEncodedHttpRequestBody) body).getData().forEach((name, value) ->  builder.addQueryParameter(name, value));
             }
         });
-        return builder.build();
+        final Request build = builder.build();
+        return build;
     }
 
     @Override

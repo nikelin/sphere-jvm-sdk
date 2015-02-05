@@ -1,6 +1,5 @@
 package io.sphere.sdk.http;
 
-import io.sphere.sdk.meta.BuildInfo;
 import io.sphere.sdk.models.Base;
 
 import java.util.*;
@@ -38,7 +37,7 @@ public class HttpHeaders extends Base {
 
     public HttpHeaders plus(final String key, final String value) {
         final Map<String, String> copy = copyOf(headers);
-        copy.put(key, value + BuildInfo.version());
+        copy.put(key, value);
         return new HttpHeaders(copy);
     }
 }
