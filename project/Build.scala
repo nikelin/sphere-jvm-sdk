@@ -2,10 +2,15 @@ import java.io.ByteArrayOutputStream
 
 import de.johoop.jacoco4sbt.JacocoPlugin.{itJacoco, jacoco}
 import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import sbt._
 import sbt.Keys._
 import sbtunidoc.Plugin.UnidocKeys._
 import sbtunidoc.Plugin._
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import scala.language.postfixOps
 
@@ -89,19 +94,40 @@ object Build extends Build {
     genDoc <<= (baseDirectory, target in unidoc) map { (baseDir, targetDir) =>
       val destination = targetDir / "javaunidoc" / "documentation-resources"
       IO.copyDirectory(baseDir / "documentation-resources", destination)
-      plantUml(targetDir / "javaunidoc" / "documentation-resources" / "images")
+      plantUml(targetDir / "javaunidoc")
       IO.listFiles(destination)
     },
     genDoc <<= genDoc.dependsOn(unidoc in Compile)
   )
 
-  def plantUml(resourcesDir: File): Unit = {
-    val source = "@startuml\nBob -> Alice : hello\n@enduml\n"
+  def plantUml(javaUnidocDir: File): Unit = {
+
+    def processLi(element: Element, parentClass: String): List[String] = {
+      val clazz = element.children().find(child => child.tagName() == "a").get.attr("href").replace(".html", "").replace("/", ".")
+
+      val subClassesUl = element.children().find(e => e.tagName() == "ul")
+      val children = subClassesUl.map(e => processUl(e, clazz)).getOrElse(Nil).toList
+      List(s"$parentClass <|-- $clazz") ++ children
+    }
+
+    def processUl(element: Element, parentClass: String): List[String] = {
+      val subExceptions = element.children()
+      subExceptions.flatMap(e => processLi(e, parentClass)).toList
+    }
+
+    val classHierarchyHtml = IO.read(javaUnidocDir / "overview-tree.html")
+    val document = Jsoup.parse(classHierarchyHtml)
+    val ulMainSphereException: Element = document.select("a[href=\"io/sphere/sdk/client/SphereClientException.html\"]")
+      .parents().get(0).select("ul").get(0)
+    val results: List[String] = processUl(ulMainSphereException, "io.sphere.sdk.client.SphereClientException")
+
+    val source = results.mkString("@startuml\n", "\n", "\n@enduml")
+
     val reader = new SourceStringReader(source)
     val os = new ByteArrayOutputStream()
     val desc = reader.generateImage(os, new FileFormatOption(FileFormat.SVG))
     os.close
-    val outFile = resourcesDir / "exception-hierarchy.svg"
+    val outFile = javaUnidocDir / "documentation-resources" / "images" / "uml" / "exception-hierarchy.svg"
     IO.write(outFile, os.toByteArray())
   }
 
