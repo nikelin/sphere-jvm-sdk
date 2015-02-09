@@ -1,4 +1,7 @@
+import java.io.ByteArrayOutputStream
+
 import de.johoop.jacoco4sbt.JacocoPlugin.{itJacoco, jacoco}
+import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
 import sbt._
 import sbt.Keys._
 import sbtunidoc.Plugin.UnidocKeys._
@@ -86,10 +89,21 @@ object Build extends Build {
     genDoc <<= (baseDirectory, target in unidoc) map { (baseDir, targetDir) =>
       val destination = targetDir / "javaunidoc" / "documentation-resources"
       IO.copyDirectory(baseDir / "documentation-resources", destination)
+      plantUml(targetDir / "javaunidoc" / "documentation-resources" / "images")
       IO.listFiles(destination)
     },
     genDoc <<= genDoc.dependsOn(unidoc in Compile)
   )
+
+  def plantUml(resourcesDir: File): Unit = {
+    val source = "@startuml\nBob -> Alice : hello\n@enduml\n"
+    val reader = new SourceStringReader(source)
+    val os = new ByteArrayOutputStream()
+    val desc = reader.generateImage(os, new FileFormatOption(FileFormat.SVG))
+    os.close
+    val outFile = resourcesDir / "exception-hierarchy.svg"
+    IO.write(outFile, os.toByteArray())
+  }
 
   val writeVersionSettings = Seq(
 //sbt buildinfo plugin cannot be used since the generated class requires Scala

@@ -8,3 +8,5 @@ javacOptions ++= Seq("-deprecation", "-Xlint:unchecked", "-source", "1.8", "-tar
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
+
+libraryDependencies += "net.sourceforge.plantuml" % "plantuml" % "8019"
