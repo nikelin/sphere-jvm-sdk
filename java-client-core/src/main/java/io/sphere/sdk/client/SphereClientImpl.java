@@ -1,9 +1,11 @@
 package io.sphere.sdk.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sphere.sdk.exceptions.*;
 import io.sphere.sdk.http.*;
 import io.sphere.sdk.meta.BuildInfo;
 import io.sphere.sdk.models.Base;
+import io.sphere.sdk.exceptions.SphereException;
 import io.sphere.sdk.utils.JsonUtils;
 import io.sphere.sdk.utils.SphereIOUtils;
 import io.sphere.sdk.utils.SphereInternalLogger;
@@ -96,13 +98,13 @@ final class SphereClientImpl extends Base implements SphereClient {
                 throw exception;
             }
         }
-        final SphereBackendException exception;
+        final SphereException exception;
         if (httpResponse.getStatusCode() == 409) {
             exception = new ConcurrentModificationException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else if(!errorResponse.getErrors().isEmpty() && errorResponse.getErrors().get(0).getCode().equals("ReferenceExists")) {
             exception = new ReferenceExistsException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else {
-            exception = new SphereBackendException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
+            exception = new SphereException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         }
         fillExceptionWithData(httpResponse, exception, sphereRequest);
         throw exception;
@@ -121,10 +123,11 @@ final class SphereClientImpl extends Base implements SphereClient {
     }
 
     private <T> void fillExceptionWithData(final HttpResponse httpResponse, final SphereException exception, final SphereRequest<T> sphereRequest) {
-        exception.setSphereRequest(sphereRequest.toString());
-        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent());
-        exception.setUnderlyingHttpResponse(httpResponse);
-        exception.setProjectKey(config.getProjectKey());
+//        exception.setSphereRequest(sphereRequest.toString());
+//        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent());
+//        exception.setUnderlyingHttpResponse(httpResponse);
+//        exception.setProjectKey(config.getProjectKey());
+        //TODO
     }
 
     @Override

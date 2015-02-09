@@ -1,11 +1,11 @@
 package io.sphere.sdk.customers.commands;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.sphere.sdk.client.SphereErrorResponse;
-import io.sphere.sdk.client.SphereException;
+import io.sphere.sdk.exceptions.SphereErrorResponse;
 import io.sphere.sdk.commands.CommandImpl;
 import io.sphere.sdk.customers.CustomerSignInResult;
 import io.sphere.sdk.customers.InvalidCurrentPasswordException;
+import io.sphere.sdk.exceptions.SphereException;
 import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.utils.JsonUtils;

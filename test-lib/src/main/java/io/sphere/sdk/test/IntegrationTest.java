@@ -2,6 +2,7 @@ package io.sphere.sdk.test;
 
 import io.sphere.sdk.client.*;
 import io.sphere.sdk.client.SphereRequest;
+import io.sphere.sdk.exceptions.ConcurrentModificationException;
 
 import java.util.concurrent.ExecutionException;
 

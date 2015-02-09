@@ -1,4 +1,4 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
 import io.sphere.sdk.models.Base;
 

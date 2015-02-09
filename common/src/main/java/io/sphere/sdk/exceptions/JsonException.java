@@ -1,6 +1,10 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
-public class JsonException extends RuntimeException {
+/**
+ * Exception concerning JSON.
+ *
+ */
+public class JsonException extends SphereException {
     private static final long serialVersionUID = 0L;
 
     public JsonException() {

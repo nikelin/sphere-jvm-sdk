@@ -1,5 +1,7 @@
 package io.sphere.sdk.client;
 
+import io.sphere.sdk.exceptions.AuthorizationException;
+import io.sphere.sdk.exceptions.JsonException;
 import io.sphere.sdk.http.*;
 import io.sphere.sdk.utils.JsonUtils;
 import io.sphere.sdk.utils.MapUtils;

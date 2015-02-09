@@ -1,8 +1,12 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
 import io.sphere.sdk.http.HttpResponse;
 
-public class EmptyHttpBodyException extends SphereClientException {
+/**
+ * An empty HTTP body from SPHERE.IO.
+ *
+ */
+public class EmptyHttpBodyException extends SphereServiceException {
     private static final long serialVersionUID = 0L;
 
     public EmptyHttpBodyException(final HttpResponse httpResponse) {

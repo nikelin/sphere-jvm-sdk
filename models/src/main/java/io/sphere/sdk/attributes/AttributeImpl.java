@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.sphere.sdk.models.Base;
-import io.sphere.sdk.client.JsonParseException;
+import io.sphere.sdk.exceptions.JsonParseException;
 
 import static java.lang.String.format;
 

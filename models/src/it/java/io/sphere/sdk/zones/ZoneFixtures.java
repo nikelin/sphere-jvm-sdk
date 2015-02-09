@@ -1,9 +1,8 @@
 package io.sphere.sdk.zones;
 
 import com.neovisionaries.i18n.CountryCode;
-import io.sphere.sdk.client.ReferenceExistsException;
+import io.sphere.sdk.exceptions.ReferenceExistsException;
 import io.sphere.sdk.client.TestClient;
-import io.sphere.sdk.queries.Predicate;
 import io.sphere.sdk.shippingmethods.commands.ShippingMethodDeleteByIdCommand;
 import io.sphere.sdk.shippingmethods.queries.ShippingMethodQuery;
 import io.sphere.sdk.shippingmethods.queries.ShippingMethodQueryModel;

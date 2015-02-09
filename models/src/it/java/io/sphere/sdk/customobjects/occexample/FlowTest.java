@@ -1,7 +1,7 @@
 package io.sphere.sdk.customobjects.occexample;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.sphere.sdk.client.ConcurrentModificationException;
+import io.sphere.sdk.exceptions.ConcurrentModificationException;
 import io.sphere.sdk.commands.Command;
 import io.sphere.sdk.customobjects.CustomObject;
 import io.sphere.sdk.customobjects.CustomObjectDraft;

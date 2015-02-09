@@ -1,5 +1,9 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
+/**
+ * Problems on parsing JSON.
+ *
+ */
 public class JsonParseException extends JsonException {
     private static final long serialVersionUID = 4954925590077093841L;
 

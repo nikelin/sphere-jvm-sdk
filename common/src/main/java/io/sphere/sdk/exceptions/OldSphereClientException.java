@@ -1,4 +1,4 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
 
 import java.nio.charset.StandardCharsets;
@@ -11,24 +11,24 @@ import io.sphere.sdk.utils.JsonUtils;
 import java.util.Date;
 
 /** Exception thrown by the Sphere Java client. */
-public class SphereClientException extends RuntimeException {
+public class OldSphereClientException extends RuntimeException {
     private static final long serialVersionUID = 0L;
     private Optional<String> sphereRequest = Optional.empty();
     private Optional<String> underlyingHttpRequest = Optional.empty();
     private Optional<String> underlyingHttpResponse = Optional.empty();
     private Optional<String> projectKey = Optional.empty();
 
-    protected SphereClientException() {}
+    protected OldSphereClientException() {}
 
-    public SphereClientException(final String message) {
+    public OldSphereClientException(final String message) {
         super(message);
     }
 
-    public SphereClientException(final String message, Throwable cause) {
+    public OldSphereClientException(final String message, Throwable cause) {
         super(message + ": " + cause.getMessage(), cause);
     }
 
-    public SphereClientException(final Throwable cause) {
+    public OldSphereClientException(final Throwable cause) {
         this(cause.getMessage(), cause);
     }
 

@@ -3,11 +3,11 @@ package io.sphere.sdk.client;
 import java.util.Optional;
 
 import io.sphere.sdk.concurrent.JavaConcurrentUtils;
+import io.sphere.sdk.exceptions.OldSphereClientException;
 import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.SphereIOUtils;
 import io.sphere.sdk.utils.SphereInternalLogger;
-import io.sphere.sdk.utils.UrlUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -59,7 +59,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                 beginRefresh();
                 tokenResult = waitForToken();
                 if (!tokenResult.isPresent()) {
-                    throw new SphereClientException("Access token expired immediately after refresh.");
+                    throw new OldSphereClientException("Access token expired immediately after refresh.");
                 }
             }
             if (tokenResult.get().isError()) {
@@ -130,7 +130,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                         AUTH_LOGGER.debug(() -> "Refreshed access token.");
                         scheduleNextRefresh(tokens);
                     } else {
-                        this.accessTokenResult = Optional.of(ValidationE.<AccessToken>error(new SphereClientException(e)));
+                        this.accessTokenResult = Optional.of(ValidationE.<AccessToken>error(new OldSphereClientException(e)));
                         final boolean isShuttingDown = e instanceof InterruptedException;
                         if (!isShuttingDown) {
                             AUTH_LOGGER.error(() -> "Failed to refresh access token.", e);

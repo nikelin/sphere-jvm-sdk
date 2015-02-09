@@ -1,8 +1,7 @@
-package io.sphere.sdk.client;
+package io.sphere.sdk.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Collections;

@@ -103,8 +103,8 @@ object Build extends Build {
   def plantUml(javaUnidocDir: File): Unit = {
 
     def processLi(element: Element, parentClass: String): List[String] = {
-      val clazz = element.children().find(child => child.tagName() == "a").get.attr("href").replace(".html", "").replace("/", ".")
-
+      val elementWithLink: Element = element.children().find(child => child.tagName() == "a").get
+      val clazz = elementWithLink.attr("href").replace(".html", "").replace("/", ".")
       val subClassesUl = element.children().find(e => e.tagName() == "ul")
       val children = subClassesUl.map(e => processUl(e, clazz)).getOrElse(Nil).toList
       List(s"$parentClass <|-- $clazz") ++ children
@@ -117,11 +117,11 @@ object Build extends Build {
 
     val classHierarchyHtml = IO.read(javaUnidocDir / "overview-tree.html")
     val document = Jsoup.parse(classHierarchyHtml)
-    val ulMainSphereException: Element = document.select("a[href=\"io/sphere/sdk/client/SphereClientException.html\"]")
+    val ulMainSphereException: Element = document.select("a[href=\"io/sphere/sdk/exceptions/SphereException.html\"]")
       .parents().get(0).select("ul").get(0)
-    val results: List[String] = processUl(ulMainSphereException, "io.sphere.sdk.client.SphereClientException")
+    val results: List[String] = processUl(ulMainSphereException, "io.sphere.sdk.exceptions.SphereException")
 
-    val source = results.mkString("@startuml\n", "\n", "\n@enduml")
+    val source = "@startuml\n" + "" + results.mkString("\n") + "\n@enduml"
 
     val reader = new SourceStringReader(source)
     val os = new ByteArrayOutputStream()
