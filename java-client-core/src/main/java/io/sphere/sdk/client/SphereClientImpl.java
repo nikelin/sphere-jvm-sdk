@@ -106,8 +106,10 @@ final class SphereClientImpl extends Base implements SphereClient {
             return new ServiceUnavailableException();
         } else if(httpResponse.getStatusCode() == 504) {
             return new GatewayTimeoutException();
-        } else  if (httpResponse.getStatusCode() == 409) {
+        } else if (httpResponse.getStatusCode() == 409) {
             return new ConcurrentModificationException();
+        } else if (httpResponse.getStatusCode() == 404) {
+            return new NotFoundException();
         } else {
             return new JsonException("Can't parse backend response.");
         }
