@@ -2,7 +2,6 @@ package io.sphere.sdk.http;
 
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.MapUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.*;
 

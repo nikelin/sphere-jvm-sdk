@@ -3,8 +3,7 @@ package io.sphere.sdk.exceptions;
 import io.sphere.sdk.categories.Category;
 import io.sphere.sdk.categories.commands.CategoryUpdateCommand;
 import io.sphere.sdk.categories.queries.CategoryQuery;
-import io.sphere.sdk.client.SphereClientFactory;
-import io.sphere.sdk.client.SphereRequest;
+import io.sphere.sdk.client.*;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
@@ -35,6 +34,21 @@ public class SphereExceptionTest extends IntegrationTest {
     }
 
     @Test
+    public void internalServerError() throws Throwable {
+        aHttpResponseWithCode(500).resultsInA(InternalServerErrorException .class);
+    }
+
+    @Test
+    public void badGateway() throws Throwable {
+        aHttpResponseWithCode(502).resultsInA(BadGatewayException .class);
+    }
+
+    @Test
+    public void serviceUnavailable() throws Throwable {
+        aHttpResponseWithCode(503).resultsInA(ServiceUnavailableException .class);
+    }
+
+    @Test
     public void gatewayTimeout() throws Throwable {
         aHttpResponseWithCode(504).resultsInA(GatewayTimeoutException.class);
     }
@@ -62,6 +76,13 @@ public class SphereExceptionTest extends IntegrationTest {
         } catch (final SphereServiceException e) {
             assertThat(e.getProjectKey()).isPresentAs(projectKey());
         }
+    }
+
+    @Test
+    public void invalidCredentialsToGetToken() throws Exception {
+        thrown.expect(InvalidCredentialsException.class);
+        final SphereAuthConfig config = SphereAuthConfig.of(projectKey(), clientId(), "wrong-password", authUrl());
+        SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
     }
 
     private DummyExceptionTestDsl aHttpResponseWithCode(final int responseCode) {

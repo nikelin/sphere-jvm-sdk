@@ -1,13 +1,12 @@
 package io.sphere.sdk.client;
 
-import io.sphere.sdk.exceptions.OldSphereClientException;
+import io.sphere.sdk.exceptions.AuthorizationException;
 import io.sphere.sdk.utils.Validation;
 
-/** Validation with the error type being {@link io.sphere.sdk.exceptions.OldSphereClientException}. */
-final class ValidationE<T> extends Validation<T, OldSphereClientException> {
+final class ValidationE<T> extends Validation<T, AuthorizationException> {
 
     //TODO make private
-    public ValidationE(T value, OldSphereClientException exception) {
+    public ValidationE(T value, final AuthorizationException exception) {
         super(value, exception);
     }
 
@@ -17,7 +16,7 @@ final class ValidationE<T> extends Validation<T, OldSphereClientException> {
      * @param <T> the type of the possible value, but absent value
      * @return the result
      */
-    public static <T> ValidationE<T> error(OldSphereClientException exception) {
+    public static <T> ValidationE<T> error(final AuthorizationException exception) {
         return new ValidationE<>(null, exception);
     }
 }

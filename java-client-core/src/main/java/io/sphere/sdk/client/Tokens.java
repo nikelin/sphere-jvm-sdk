@@ -2,6 +2,7 @@ package io.sphere.sdk.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.sphere.sdk.exceptions.AuthorizationException;
 import io.sphere.sdk.exceptions.OldSphereClientException;
 
 import java.util.Optional;
@@ -19,7 +20,7 @@ final class Tokens {
 
     public Tokens(String accessToken, String refreshToken, Optional<Long> expiresIn) {
         if (isEmpty(accessToken))
-            throw new OldSphereClientException("OAuth response must contain an access_token. Was empty.");
+            throw new AuthorizationException("OAuth response must contain an access_token. Was empty.");
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expiresIn = expiresIn;

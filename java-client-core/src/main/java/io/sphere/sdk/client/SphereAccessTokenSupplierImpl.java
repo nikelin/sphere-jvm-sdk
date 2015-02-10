@@ -3,7 +3,7 @@ package io.sphere.sdk.client;
 import java.util.Optional;
 
 import io.sphere.sdk.concurrent.JavaConcurrentUtils;
-import io.sphere.sdk.exceptions.OldSphereClientException;
+import io.sphere.sdk.exceptions.AuthorizationException;
 import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.SphereIOUtils;
@@ -12,6 +12,7 @@ import io.sphere.sdk.utils.SphereInternalLogger;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -59,7 +60,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                 beginRefresh();
                 tokenResult = waitForToken();
                 if (!tokenResult.isPresent()) {
-                    throw new OldSphereClientException("Access token expired immediately after refresh.");
+                    throw new AuthorizationException("Access token expired immediately after refresh.");
                 }
             }
             if (tokenResult.get().isError()) {
@@ -108,8 +109,9 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                             final CompletableFuture<Tokens> tokensForClientFuture = oauthClient.getTokensForClient();
                             tokens = tokensForClientFuture.get();
                         }
-                    } catch (Exception e) {
-                        update(null, e);
+                    } catch (final Exception e) {
+                        final Throwable usedException = e instanceof ExecutionException ? ((ExecutionException) e).getCause() : e;
+                        update(null, usedException);
                         return;
                     }
                     update(tokens, null);
@@ -120,7 +122,7 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
         }
     }
 
-    private void update(Tokens tokens, Exception e) {
+    private void update(final Tokens tokens, final Throwable e) {
         if (!isClosed) {
             synchronized (accessTokenLock) {
                 try {
@@ -130,7 +132,8 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
                         AUTH_LOGGER.debug(() -> "Refreshed access token.");
                         scheduleNextRefresh(tokens);
                     } else {
-                        this.accessTokenResult = Optional.of(ValidationE.<AccessToken>error(new OldSphereClientException(e)));
+                        final AuthorizationException usedE = e instanceof AuthorizationException ? (AuthorizationException) e : new AuthorizationException(e);
+                        this.accessTokenResult = Optional.of(ValidationE.<AccessToken>error(usedE));
                         final boolean isShuttingDown = e instanceof InterruptedException;
                         if (!isShuttingDown) {
                             AUTH_LOGGER.error(() -> "Failed to refresh access token.", e);
