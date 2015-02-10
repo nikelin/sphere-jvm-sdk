@@ -52,4 +52,12 @@ public abstract class IntegrationTest {
             }
         }
     }
+
+    protected static void fail() {
+        fail("this test should fail");
+    }
+
+    protected static void fail(final String message) {
+        throw new RuntimeException(message);
+    }
 }

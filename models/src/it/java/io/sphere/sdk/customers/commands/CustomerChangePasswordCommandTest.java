@@ -11,7 +11,6 @@ import java.util.Optional;
 import static io.sphere.sdk.customers.CustomerFixtures.PASSWORD;
 import static io.sphere.sdk.customers.CustomerFixtures.withCustomer;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 public class CustomerChangePasswordCommandTest extends IntegrationTest {
 

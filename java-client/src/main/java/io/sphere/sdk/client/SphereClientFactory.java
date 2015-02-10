@@ -83,7 +83,7 @@ public class SphereClientFactory extends Base {
                 final HttpRequestIntent httpRequest = sphereRequest.httpRequestIntent();
                 final HttpResponse httpResponse = function.apply(httpRequest);
                 try {
-                    final T t = SphereClientImpl.parse(httpResponse, sphereRequest, objectMapper);
+                    final T t = SphereClientImpl.parse(httpResponse, sphereRequest, objectMapper, SphereApiConfig.of("createHttpTestDouble", "https://createHttpTestDouble.tld"));
                     return CompletableFutureUtils.successful(t);
                 } catch (final Exception e) {
                     return CompletableFutureUtils.failed(e);

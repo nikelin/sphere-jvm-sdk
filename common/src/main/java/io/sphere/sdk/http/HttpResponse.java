@@ -51,4 +51,8 @@ public interface HttpResponse {
     public static HttpResponse of(final int status, final Optional<byte[]> body, final Optional<HttpRequest> associatedRequest) {
         return new HttpResponseImpl(status, body, associatedRequest);
     }
+
+    default HttpResponse withoutRequest() {
+        return HttpResponse.of(getStatusCode(), getResponseBody(), Optional.<HttpRequest>empty());
+    }
 }

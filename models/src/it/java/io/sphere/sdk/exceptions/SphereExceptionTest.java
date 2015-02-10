@@ -1,21 +1,27 @@
 package io.sphere.sdk.exceptions;
 
+import io.sphere.sdk.categories.Category;
+import io.sphere.sdk.categories.commands.CategoryUpdateCommand;
 import io.sphere.sdk.categories.queries.CategoryQuery;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.client.SphereRequest;
+import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.models.Base;
+import io.sphere.sdk.models.Versioned;
 import io.sphere.sdk.test.IntegrationTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Collections;
 import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.sphere.sdk.http.HttpMethod.POST;
+import static io.sphere.sdk.test.OptionalAssert.assertThat;
 
 public class SphereExceptionTest extends IntegrationTest {
 
@@ -33,11 +39,36 @@ public class SphereExceptionTest extends IntegrationTest {
         aHttpResponseWithCode(504).resultsInA(GatewayTimeoutException.class);
     }
 
+    @Test
+    public void notFoundExceptionOnUpdateWithMissingObject() throws Exception {
+        final CategoryUpdateCommand updateCommand =
+                CategoryUpdateCommand.of(Versioned.of("not-existing-id", 1), Collections.<UpdateAction<Category>>emptyList());
+        executing(() -> updateCommand)
+                .resultsInA(NotFoundException.class);
+
+        try {
+            execute(CategoryUpdateCommand.of(Versioned.of("foo", 1), Collections.<UpdateAction<Category>>emptyList()));
+            fail("should throw exception");
+        } catch (final SphereServiceException e) {
+            assertThat(e.getProjectKey()).isPresentAs(projectKey());
+        }
+    }
+
+    @Test
+    public void exceptionsGatherContext() throws Exception {
+        try {
+            execute(CategoryUpdateCommand.of(Versioned.of("foo", 1), Collections.<UpdateAction<Category>>emptyList()));
+            fail("should throw exception");
+        } catch (final SphereServiceException e) {
+            assertThat(e.getProjectKey()).isPresentAs(projectKey());
+        }
+    }
+
     private DummyExceptionTestDsl aHttpResponseWithCode(final int responseCode) {
         return new DummyExceptionTestDsl(responseCode);
     }
 
-    private ExceptionTestDsl executing(final Supplier<TestSphereRequest> f) {
+    private ExceptionTestDsl executing(final Supplier<SphereRequest<? extends Object>> f) {
         return new ExceptionTestDsl(f);
     }
 
@@ -61,15 +92,15 @@ public class SphereExceptionTest extends IntegrationTest {
     }
 
     private class ExceptionTestDsl {
-        private final Supplier<TestSphereRequest> f;
+        private final Supplier<SphereRequest<? extends Object>> f;
 
-        public ExceptionTestDsl(final Supplier<TestSphereRequest> f) {
+        public ExceptionTestDsl(final Supplier<SphereRequest<? extends Object>> f) {
             this.f = f;
         }
 
         public void resultsInA(final Class<? extends Throwable> type) {
             thrown.expect(type);
-            final TestSphereRequest testSphereRequest = f.get();
+            final SphereRequest<? extends Object> testSphereRequest = f.get();
             execute(testSphereRequest);
         }
     }

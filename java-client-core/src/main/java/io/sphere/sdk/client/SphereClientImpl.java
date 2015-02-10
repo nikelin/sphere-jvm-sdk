@@ -55,10 +55,10 @@ final class SphereClientImpl extends Base implements SphereClient {
         });
         return httpClient.
                 execute(httpRequest).
-                thenApply(preProcess(usedClientRequest, objectMapper));
+                thenApply(preProcess(usedClientRequest, objectMapper, config));
     }
 
-    static <T> Function<HttpResponse, T> preProcess(final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+    static <T> Function<HttpResponse, T> preProcess(final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper, final SphereApiConfig config) {
         return new Function<HttpResponse, T>() {
             @Override
             public T apply(final HttpResponse httpResponse) {
@@ -66,17 +66,17 @@ final class SphereClientImpl extends Base implements SphereClient {
                 logger.debug(() -> httpResponse);
                 logger.trace(() -> httpResponse.getStatusCode() + "\n" + httpResponse.getResponseBody().map(body -> JsonUtils.prettyPrintJsonStringSecure(bytesToString(body))).orElse("No body present.") + "\n");
                 final T result;
-                result = parse(httpResponse, sphereRequest, objectMapper);
+                result = parse(httpResponse, sphereRequest, objectMapper, config);
                 return result;
             }
 
         };
     }
 
-    static <T> T parse(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+    static <T> T parse(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper, final SphereApiConfig config) {
         final T result;
         if (!sphereRequest.canHandleResponse(httpResponse)) {
-            final SphereException sphereException = createExceptionFor(httpResponse, sphereRequest, objectMapper);
+            final SphereException sphereException = createExceptionFor(httpResponse, sphereRequest, objectMapper, config);
             throw sphereException;
         } else {
             try {
@@ -89,9 +89,9 @@ final class SphereClientImpl extends Base implements SphereClient {
         return result;
     }
 
-    private static <T> SphereException createExceptionFor(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+    private static <T> SphereException createExceptionFor(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper, final SphereApiConfig config) {
         final SphereException sphereException = createFlatException(httpResponse, sphereRequest, objectMapper);
-        fillExceptionWithData(sphereRequest, httpResponse, sphereException);
+        fillExceptionWithData(sphereRequest, httpResponse, sphereException, config);
         return sphereException;
     }
 
@@ -126,12 +126,11 @@ final class SphereClientImpl extends Base implements SphereClient {
         return httpResponse.getStatusCode() / 100 != 2;
     }
 
-    private static  <T> void fillExceptionWithData(final SphereRequest<T> sphereRequest, final HttpResponse httpResponse, final SphereException exception) {
-//        exception.setSphereRequest(sphereRequest.toString());
-//        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent());
-//        exception.setUnderlyingHttpResponse(httpResponse);
-//        exception.setProjectKey(config.getProjectKey());
-        //TODO
+    private static <T> void fillExceptionWithData(final SphereRequest<T> sphereRequest, final HttpResponse httpResponse, final SphereException exception, final SphereApiConfig config) {
+        exception.setSphereRequest(sphereRequest.toString());
+        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent().toString());
+        exception.setUnderlyingHttpResponse(httpResponse.withoutRequest().toString());
+        exception.setProjectKey(config.getProjectKey());
     }
 
     @Override
