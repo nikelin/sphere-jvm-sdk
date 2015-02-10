@@ -3,7 +3,6 @@ package io.sphere.sdk.client;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.sphere.sdk.exceptions.AuthorizationException;
-import io.sphere.sdk.exceptions.OldSphereClientException;
 
 import java.util.Optional;
 

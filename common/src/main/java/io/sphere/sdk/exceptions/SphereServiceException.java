@@ -13,6 +13,11 @@ public abstract class SphereServiceException extends SphereException {
         this.statusCode = statusCode;
     }
 
+    public SphereServiceException(final String message, final int statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
     public int getStatusCode() {
         return statusCode;
     }

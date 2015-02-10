@@ -85,6 +85,14 @@ public class SphereExceptionTest extends IntegrationTest {
         SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
     }
 
+    @Test
+    public void apiRequestWithWrongToken() throws Exception {
+        thrown.expect(UnauthorizedException.class);
+        final SphereApiConfig config = SphereApiConfig.of(projectKey(), apiUrl());
+        final SphereClient client = SphereClientFactory.of().createClient(config, SphereAccessTokenSupplier.ofConstantToken("invalid-token"));
+        client.execute(CategoryQuery.of()).join();
+    }
+
     private DummyExceptionTestDsl aHttpResponseWithCode(final int responseCode) {
         return new DummyExceptionTestDsl(responseCode);
     }

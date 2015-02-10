@@ -37,10 +37,6 @@ public class SphereException extends RuntimeException {
         //TODO
     }
 
-    public SphereException(final HttpRequestIntent httpRequestIntent, final SphereErrorResponse errorResponse) {
-
-    }
-
     public Optional<String> getProjectKey() {
         return projectKey;
     }
@@ -92,13 +88,13 @@ public class SphereException extends RuntimeException {
     @Override
     public String getMessage() {
         StringBuilder builder = new StringBuilder("\n===== BEGIN EXCEPTION OUTPUT =====").append("\n");
-        final String httpRequest = underlyingHttpRequest.orElse("<unknown>");
+        final String httpRequest = getUnderlyingHttpRequest().orElse("<unknown>");
         return builder
                 .append("SDK: ").append(BuildInfo.version()).append("\n")
-                .append("project: ").append(projectKey.orElse("<unknown>")).append("\n")
-                .append("sphere request: ").append(sphereRequest.orElse("<unknown>")).append("\n")
+                .append("project: ").append(getProjectKey().orElse("<unknown>")).append("\n")
+                .append("sphere request: ").append(getSphereRequest().orElse("<unknown>")).append("\n")
                 .append("http request: ").append(httpRequest).append("\n")
-                .append("http response: ").append(underlyingHttpResponse.orElse("<unknown>")).append("\n")
+                .append("http response: ").append(getUnderlyingHttpResponse().orElse("<unknown>")).append("\n")
                 .append(Optional.ofNullable(super.getMessage()).map(s -> "detailMessage: " + s + "\n").orElse(""))
                 .append("Java: ").append(System.getProperty("java.version")).append("\n")
                 .append("cwd: ").append(System.getProperty("user.dir")).append("\n")
