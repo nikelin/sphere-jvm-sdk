@@ -55,10 +55,10 @@ final class SphereClientImpl extends Base implements SphereClient {
         });
         return httpClient.
                 execute(httpRequest).
-                thenApply(preProcess(usedClientRequest));
+                thenApply(preProcess(usedClientRequest, objectMapper));
     }
 
-    private <T> Function<HttpResponse, T> preProcess(final SphereRequest<T> sphereRequest) {
+    static <T> Function<HttpResponse, T> preProcess(final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
         return new Function<HttpResponse, T>() {
             @Override
             public T apply(final HttpResponse httpResponse) {
@@ -66,52 +66,55 @@ final class SphereClientImpl extends Base implements SphereClient {
                 logger.debug(() -> httpResponse);
                 logger.trace(() -> httpResponse.getStatusCode() + "\n" + httpResponse.getResponseBody().map(body -> JsonUtils.prettyPrintJsonStringSecure(bytesToString(body))).orElse("No body present.") + "\n");
                 final T result;
-                if (isErrorResponse(httpResponse) && !sphereRequest.canHandleResponse(httpResponse)) {
-                    result = handleErrors(httpResponse, sphereRequest);
-                } else {
-                    try {
-                        result = sphereRequest.resultMapper().apply(httpResponse);
-                    } catch (final JsonException e) {
-                        final byte[] bytes = httpResponse.getResponseBody().get();
-                        throw new JsonException("Cannot parse " + bytesToString(bytes), e);
-                    }
-                }
+                result = parse(httpResponse, sphereRequest, objectMapper);
                 return result;
             }
 
         };
     }
 
-    public <T> T handleErrors(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest) {
-        SphereErrorResponse errorResponse;
-        try {
-            if (!httpResponse.getResponseBody().isPresent()) {//the /model/id endpoint does not return JSON on 404
-                errorResponse = SphereErrorResponse.of(httpResponse.getStatusCode(), "<no body>", Collections.<SphereError>emptyList());
-            } else {
-                errorResponse = objectMapper.readValue(httpResponse.getResponseBody().get(), SphereErrorResponse.typeReference());
-            }
-        } catch (final Exception e) {
-            if (isServiceNotAvailable(httpResponse)) {
-                throw new ServiceUnavailableException(e);
-            } else {
-                final SphereException exception = new SphereException("Can't parse backend response.", e);
-                fillExceptionWithData(httpResponse, exception, sphereRequest);
-                throw exception;
-            }
-        }
-        final SphereException exception;
-        if (httpResponse.getStatusCode() == 409) {
-            exception = new ConcurrentModificationException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
-        } else if(!errorResponse.getErrors().isEmpty() && errorResponse.getErrors().get(0).getCode().equals("ReferenceExists")) {
-            exception = new SphereReferenceExistsException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
+    static <T> T parse(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+        final T result;
+        if (!sphereRequest.canHandleResponse(httpResponse)) {
+            final SphereException sphereException = createExceptionFor(httpResponse, sphereRequest, objectMapper);
+            throw sphereException;
         } else {
-            exception = new SphereException(sphereRequest.httpRequestIntent(), errorResponse);
+            try {
+                result = sphereRequest.resultMapper().apply(httpResponse);
+            } catch (final JsonException e) {
+                final byte[] bytes = httpResponse.getResponseBody().get();
+                throw new JsonException("Cannot parse " + bytesToString(bytes), e);
+            }
         }
-        fillExceptionWithData(httpResponse, exception, sphereRequest);
-        throw exception;
+        return result;
     }
 
-    private boolean isServiceNotAvailable(final HttpResponse httpResponse) {
+    private static <T> SphereException createExceptionFor(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+        final SphereException sphereException = createFlatException(httpResponse, sphereRequest, objectMapper);
+        fillExceptionWithData(sphereRequest, httpResponse, sphereException);
+        return sphereException;
+    }
+
+    private static <T> SphereException createFlatException(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+        if (isServiceNotAvailable(httpResponse)) {
+            return new ServiceUnavailableException();
+        } else if(httpResponse.getStatusCode() == 500) {
+            return new InternalServerErrorException();
+        } else if(httpResponse.getStatusCode() == 502) {
+            return new BadGatewayException();
+        } else if(httpResponse.getStatusCode() == 503) {
+            return new ServiceUnavailableException();
+        } else if(httpResponse.getStatusCode() == 504) {
+            return new GatewayTimeoutException();
+        } else  if (httpResponse.getStatusCode() == 409) {
+            return new ConcurrentModificationException();
+        } else {
+            return new JsonException("Can't parse backend response.");
+        }
+    }
+
+    //hack since backend returns in same error conditions responce code 500 but with the message Service unavailable
+    private static boolean isServiceNotAvailable(final HttpResponse httpResponse) {
         return httpResponse.getStatusCode() == 503 || httpResponse.getResponseBody().map(b -> bytesToString(b)).map(s -> s.contains("<h2>Service Unavailable</h2>")).orElse(false);
     }
 
@@ -123,7 +126,7 @@ final class SphereClientImpl extends Base implements SphereClient {
         return httpResponse.getStatusCode() / 100 != 2;
     }
 
-    private <T> void fillExceptionWithData(final HttpResponse httpResponse, final SphereException exception, final SphereRequest<T> sphereRequest) {
+    private static  <T> void fillExceptionWithData(final SphereRequest<T> sphereRequest, final HttpResponse httpResponse, final SphereException exception) {
 //        exception.setSphereRequest(sphereRequest.toString());
 //        exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent());
 //        exception.setUnderlyingHttpResponse(httpResponse);

@@ -1,9 +1,11 @@
 package io.sphere.sdk.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.models.Base;
+import io.sphere.sdk.utils.JsonUtils;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -74,15 +76,17 @@ public class SphereClientFactory extends Base {
      */
     public SphereClient createHttpTestDouble(final Function<HttpRequestIntent, HttpResponse> function) {
         return new SphereClient() {
+            private final ObjectMapper objectMapper = JsonUtils.newObjectMapper();
+
             @Override
             public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
                 final HttpRequestIntent httpRequest = sphereRequest.httpRequestIntent();
                 final HttpResponse httpResponse = function.apply(httpRequest);
-                if (sphereRequest.canHandleResponse(httpResponse)) {
-                    final T resultObject = sphereRequest.resultMapper().apply(httpResponse);
-                    return CompletableFutureUtils.fulfilled(resultObject);
-                } else {
-                    throw new UnsupportedOperationException("TODO error case handling");
+                try {
+                    final T t = SphereClientImpl.parse(httpResponse, sphereRequest, objectMapper);
+                    return CompletableFutureUtils.successful(t);
+                } catch (final Exception e) {
+                    return CompletableFutureUtils.failed(e);
                 }
             }
 
@@ -113,7 +117,7 @@ public class SphereClientFactory extends Base {
             @Override
             public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
                 final T result = (T) function.apply(sphereRequest.httpRequestIntent());
-                return CompletableFutureUtils.fulfilled(result);
+                return CompletableFutureUtils.successful(result);
             }
 
             @Override

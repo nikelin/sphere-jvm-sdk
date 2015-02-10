@@ -32,6 +32,10 @@ public interface HttpResponse {
         return responseCodeStartsWith(this, 5);
     }
 
+    public static HttpResponse of(final int status) {
+        return of(status, Optional.<byte[]>empty(), Optional.<HttpRequest>empty());
+    }
+
     public static HttpResponse of(final int status, final String responseBody) {
         return of(status, responseBody, Optional.empty());
     }

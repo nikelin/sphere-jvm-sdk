@@ -9,7 +9,6 @@ public class ServiceUnavailableException extends ServerErrorException {
 
     //TODO HTTP code 503
 
-    public ServiceUnavailableException(final Throwable cause) {
-        super(cause);
+    public ServiceUnavailableException() {
     }
 }

@@ -6,9 +6,15 @@ final class CompletableFutureUtils {
     private CompletableFutureUtils() {
     }
 
-    public static <T> CompletableFuture<T> fulfilled(final T object) {
+    public static <T> CompletableFuture<T> successful(final T object) {
         final CompletableFuture<T> future = new CompletableFuture<>();
         future.complete(object);
+        return future;
+    }
+
+    public static <T> CompletableFuture<T> failed(final Throwable e) {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        future.completeExceptionally(e);
         return future;
     }
 }

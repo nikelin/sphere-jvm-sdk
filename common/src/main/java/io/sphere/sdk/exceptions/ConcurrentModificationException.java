@@ -7,8 +7,6 @@ package io.sphere.sdk.exceptions;
 public class ConcurrentModificationException extends SphereServiceException {
     private static final long serialVersionUID = 0L;
 
-    public ConcurrentModificationException(final String requestUrl, final SphereErrorResponse errorResponse) {
-//        super(requestUrl, errorResponse); TODO
-        super();
+    public ConcurrentModificationException() {
     }
 }
