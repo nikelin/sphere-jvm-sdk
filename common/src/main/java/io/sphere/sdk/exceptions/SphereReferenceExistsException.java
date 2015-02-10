@@ -5,10 +5,10 @@ package io.sphere.sdk.exceptions;
  * it is referenced by another resource.</span>
  *
  */
-public class ReferenceExistsException extends BadRequestException {
+public class SphereReferenceExistsException extends BadRequestException {
     private static final long serialVersionUID = 0L;
 
-    public ReferenceExistsException(final String requestUrl, final SphereErrorResponse errorResponse) {
+    public SphereReferenceExistsException(final String requestUrl, final SphereErrorResponse errorResponse) {
 //        super(requestUrl, errorResponse); TODO
     }
 }

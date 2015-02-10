@@ -26,7 +26,7 @@ public class CustomerCreateTokenCommand extends CommandImpl<CustomerToken> {
 
     @Override
     public HttpRequestIntent httpRequestIntent() {
-        return HttpRequestIntent.ofJson(POST, "/customers/password-token", JsonUtils.toJson(this));
+        return HttpRequestIntent.of(POST, "/customers/password-token", JsonUtils.toJson(this));
     }
 
     public String getEmail() {

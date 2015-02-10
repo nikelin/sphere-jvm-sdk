@@ -7,6 +7,7 @@ import io.sphere.sdk.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -107,12 +108,12 @@ public final class SphereInternalLogger {
 
     public static SphereInternalLogger getLogger(final HttpRequest httpRequest) {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
-        return getLogger(getFirstPathElement(httpRequest) + ".requests." + requestOrCommandScopeSegment(httpMethod));
+        return getLogger(getPathElement(httpRequest) + ".requests." + requestOrCommandScopeSegment(httpMethod));
     }
 
     public static SphereInternalLogger getLogger(final HttpResponse response) {
         final String firstPathElement = response.getAssociatedRequest()
-                .map(r -> getFirstPathElement(r)).orElse("endpoint-unknown");
+                .map(r -> getPathElement(r)).orElse("endpoint-unknown");
         final String lastPathElement = response.getAssociatedRequest()
                 .map(r -> requestOrCommandScopeSegment(r.getHttpMethod())).orElse("execution-type-unknown");
         return getLogger(firstPathElement + ".responses." + lastPathElement);
@@ -122,10 +123,9 @@ public final class SphereInternalLogger {
         return new SphereInternalLogger(LoggerFactory.getLogger("sphere." + loggerName));
     }
 
-    private static String getFirstPathElement(final HttpRequest httpRequest) {
+    private static String getPathElement(final HttpRequest httpRequest) {
         final String path = httpRequest.getUrl();
-        final String leadingSlashRemoved = path.substring(1);
-        return substringBefore(substringBefore(leadingSlashRemoved, "/"), "?");
+        return path.split("/")[4];
     }
 
     private static String requestOrCommandScopeSegment(final HttpMethod httpMethod) {

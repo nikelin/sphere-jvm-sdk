@@ -1,9 +1,11 @@
 package io.sphere.sdk.http;
 
+import io.sphere.sdk.models.Base;
+
 import java.io.File;
 import java.util.Optional;
 
-public class HttpRequestIntent {
+public class HttpRequestIntent extends Base {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String APPLICATION_JSON = "application/json";
     private final HttpMethod httpMethod;
@@ -42,15 +44,15 @@ public class HttpRequestIntent {
         return of(httpMethod, path, HttpHeaders.of(), Optional.<HttpRequestBody>empty());
     }
 
-    public static HttpRequestIntent ofJson(final HttpMethod httpMethod, final String path, final String body) {
-        return ofJson(httpMethod, path, HttpHeaders.of(), body);
+    public static HttpRequestIntent of(final HttpMethod httpMethod, final String path, final String body) {
+        return of(httpMethod, path, HttpHeaders.of(), body);
     }
 
     public static HttpRequestIntent of(final HttpMethod httpMethod, final String path, final File body, final String contentType) {
         return of(httpMethod, path, HttpHeaders.of(CONTENT_TYPE, contentType), Optional.of(FileHttpRequestBody.of(body)));
     }
 
-    public static HttpRequestIntent ofJson(final HttpMethod httpMethod, final String path, final HttpHeaders headers, final String body) {
+    public static HttpRequestIntent of(final HttpMethod httpMethod, final String path, final HttpHeaders headers, final String body) {
         return of(httpMethod, path, headers.plus(CONTENT_TYPE, APPLICATION_JSON), Optional.of(StringHttpRequestBody.of(body)));
     }
 

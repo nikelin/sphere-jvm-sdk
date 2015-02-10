@@ -35,7 +35,7 @@ public class CustomerVerifyEmailCommand extends CommandImpl<Customer> {
 
     @Override
     public HttpRequestIntent httpRequestIntent() {
-        return HttpRequestIntent.ofJson(POST, "/customers/email/confirm", JsonUtils.toJson(this));
+        return HttpRequestIntent.of(POST, "/customers/email/confirm", JsonUtils.toJson(this));
     }
 
     public static CustomerVerifyEmailCommand of(final Versioned<Customer> customer, final String tokenValue) {

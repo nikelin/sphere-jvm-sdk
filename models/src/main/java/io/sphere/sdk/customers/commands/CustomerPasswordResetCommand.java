@@ -38,7 +38,7 @@ public class CustomerPasswordResetCommand extends CommandImpl<Customer> {
 
     @Override
     public HttpRequestIntent httpRequestIntent() {
-        return HttpRequestIntent.ofJson(POST, "/customers/password/reset", JsonUtils.toJson(this));
+        return HttpRequestIntent.of(POST, "/customers/password/reset", JsonUtils.toJson(this));
     }
 
     public String getId() {

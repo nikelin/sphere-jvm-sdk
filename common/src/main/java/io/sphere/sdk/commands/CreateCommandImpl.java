@@ -27,7 +27,7 @@ public abstract class CreateCommandImpl<T, C> extends CommandImpl<T> implements 
 
     @Override
     public HttpRequestIntent httpRequestIntent() {
-        return HttpRequestIntent.ofJson(httpMethod(), endpoint.endpoint(), httpBody());
+        return HttpRequestIntent.of(httpMethod(), endpoint.endpoint(), httpBody());
     }
 
     protected HttpMethod httpMethod() {

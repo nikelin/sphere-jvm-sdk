@@ -4,12 +4,12 @@ package io.sphere.sdk.exceptions;
  * The SPHERE.IO API is currently not available.
  *
  */
-public class SphereServiceUnavailableException extends SphereException {
+public class ServiceUnavailableException extends ServerErrorException {
     private static final long serialVersionUID = 0L;
 
     //TODO HTTP code 503
 
-    public SphereServiceUnavailableException(final Throwable cause) {
+    public ServiceUnavailableException(final Throwable cause) {
         super(cause);
     }
 }

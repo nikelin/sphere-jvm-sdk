@@ -1,7 +1,11 @@
 package io.sphere.sdk.exceptions;
 
+import io.sphere.sdk.http.HttpResponse;
+
 /**
  * Exception concerning JSON.
+ *
+ * {@include.example io.sphere.sdk.exceptions.SphereExceptionTest#invalidJsonInHttpRequestIntent()}
  *
  */
 public class JsonException extends SphereException {
@@ -24,5 +28,9 @@ public class JsonException extends SphereException {
 
     public JsonException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public JsonException(final HttpResponse httpResponse) {
+        //TODO
     }
 }

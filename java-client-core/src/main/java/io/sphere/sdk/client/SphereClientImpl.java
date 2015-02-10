@@ -44,8 +44,9 @@ final class SphereClientImpl extends Base implements SphereClient {
         logger.debug(() -> usedClientRequest);
         logger.trace(() -> {
             final String output;
-            if (httpRequest.getBody().isPresent()) {
-                final String unformattedJson = ((StringHttpRequestBody) httpRequest).getUnderlying();
+            if (httpRequest.getBody().isPresent() && httpRequest.getBody().get() instanceof StringHttpRequestBody) {
+                final StringHttpRequestBody body = (StringHttpRequestBody) httpRequest.getBody().get();
+                final String unformattedJson = body.getUnderlying();
                 output = "send: " + unformattedJson + "\nformatted: " + JsonUtils.prettyPrintJsonStringSecure(unformattedJson);
             } else {
                 output = "no request body present";
@@ -72,7 +73,7 @@ final class SphereClientImpl extends Base implements SphereClient {
                         result = sphereRequest.resultMapper().apply(httpResponse);
                     } catch (final JsonException e) {
                         final byte[] bytes = httpResponse.getResponseBody().get();
-                        throw new JsonParseException("Cannot parse " + bytesToString(bytes), e);
+                        throw new JsonException("Cannot parse " + bytesToString(bytes), e);
                     }
                 }
                 return result;
@@ -91,7 +92,7 @@ final class SphereClientImpl extends Base implements SphereClient {
             }
         } catch (final Exception e) {
             if (isServiceNotAvailable(httpResponse)) {
-                throw new SphereServiceUnavailableException(e);
+                throw new ServiceUnavailableException(e);
             } else {
                 final SphereException exception = new SphereException("Can't parse backend response.", e);
                 fillExceptionWithData(httpResponse, exception, sphereRequest);
@@ -102,9 +103,9 @@ final class SphereClientImpl extends Base implements SphereClient {
         if (httpResponse.getStatusCode() == 409) {
             exception = new ConcurrentModificationException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else if(!errorResponse.getErrors().isEmpty() && errorResponse.getErrors().get(0).getCode().equals("ReferenceExists")) {
-            exception = new ReferenceExistsException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
+            exception = new SphereReferenceExistsException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
         } else {
-            exception = new SphereException(sphereRequest.httpRequestIntent().getPath(), errorResponse);
+            exception = new SphereException(sphereRequest.httpRequestIntent(), errorResponse);
         }
         fillExceptionWithData(httpResponse, exception, sphereRequest);
         throw exception;
