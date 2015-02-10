@@ -6,4 +6,8 @@ package io.sphere.sdk.exceptions;
  */
 public class GatewayTimeoutException extends ServerErrorException {
     private static final long serialVersionUID = 0L;
+
+    public GatewayTimeoutException() {
+        super(504);
+    }
 }

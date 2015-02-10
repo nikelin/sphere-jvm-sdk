@@ -8,5 +8,6 @@ public class ConcurrentModificationException extends SphereServiceException {
     private static final long serialVersionUID = 0L;
 
     public ConcurrentModificationException() {
+        super(409);
     }
 }

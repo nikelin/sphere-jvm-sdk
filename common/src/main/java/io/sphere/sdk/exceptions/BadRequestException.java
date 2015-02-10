@@ -7,10 +7,7 @@ package io.sphere.sdk.exceptions;
 public class BadRequestException extends SphereServiceException {
     private static final long serialVersionUID = 0L;
 
-    public BadRequestException(final String message, final Exception cause) {
-        super(message, cause);
-    }
-
     public BadRequestException() {
+        super(400);
     }
 }

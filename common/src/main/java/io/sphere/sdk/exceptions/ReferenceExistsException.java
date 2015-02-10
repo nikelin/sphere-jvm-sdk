@@ -7,8 +7,4 @@ package io.sphere.sdk.exceptions;
  */
 public class ReferenceExistsException extends BadRequestException {
     private static final long serialVersionUID = 0L;
-
-    public ReferenceExistsException(final String requestUrl, final SphereErrorResponse errorResponse) {
-//        super(requestUrl, errorResponse); TODO
-    }
 }

@@ -7,23 +7,13 @@ package io.sphere.sdk.exceptions;
  */
 public class SphereServiceException extends SphereException {
     static final long serialVersionUID = 0L;
+    private final int statusCode;
 
-    //TODO status code
-
-//TODO
-    public SphereServiceException(final String message, final Throwable cause) {
-        super(message, cause);
+    public SphereServiceException(final int statusCode) {
+        this.statusCode = statusCode;
     }
 
-    public SphereServiceException() {
-//TODO
-    }
-
-    public SphereServiceException(final String message) {
-        //TODO
-    }
-
-    public SphereServiceException(final Throwable cause) {
-        //TODO
+    public int getStatusCode() {
+        return statusCode;
     }
 }

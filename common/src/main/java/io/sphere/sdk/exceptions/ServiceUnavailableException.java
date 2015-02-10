@@ -7,8 +7,7 @@ package io.sphere.sdk.exceptions;
 public class ServiceUnavailableException extends ServerErrorException {
     private static final long serialVersionUID = 0L;
 
-    //TODO HTTP code 503
-
     public ServiceUnavailableException() {
+        super(503);
     }
 }

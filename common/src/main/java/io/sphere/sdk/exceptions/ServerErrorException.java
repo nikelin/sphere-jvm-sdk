@@ -6,10 +6,7 @@ package io.sphere.sdk.exceptions;
 public abstract class ServerErrorException extends SphereServiceException {
     static final long serialVersionUID = 0L;
 
-    protected ServerErrorException(final Throwable cause) {
-        super(cause);
-    }
-
-    protected ServerErrorException() {
+    protected ServerErrorException(final int statusCode) {
+        super(statusCode);
     }
 }
