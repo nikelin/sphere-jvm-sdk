@@ -7,7 +7,7 @@ import java.util.Optional;
 final class HttpRequestImpl extends Base implements HttpRequest {
     private final HttpMethod httpMethod;
     private final String url;
-    private final HttpHeaders headers;//TODO remove Authorization from toString
+    private final HttpHeaders headers;
     private final Optional<HttpRequestBody> body;
 
     HttpRequestImpl(final HttpMethod httpMethod, final String url, final HttpHeaders headers, final Optional<HttpRequestBody> body) {

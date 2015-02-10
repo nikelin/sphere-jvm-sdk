@@ -1,6 +1,8 @@
 package io.sphere.sdk.http;
 
 import io.sphere.sdk.models.Base;
+import io.sphere.sdk.utils.MapUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.*;
 
@@ -9,6 +11,7 @@ import static io.sphere.sdk.utils.MapUtils.mapOf;
 import static java.util.Collections.unmodifiableMap;
 
 public class HttpHeaders extends Base {
+    public static final String AUTHORIZATION = "Authorization";
     private final Map<String, String> headers;
 
     private HttpHeaders(final Map<String, String> headers) {
@@ -39,5 +42,14 @@ public class HttpHeaders extends Base {
         final Map<String, String> copy = copyOf(headers);
         copy.put(key, value);
         return new HttpHeaders(copy);
+    }
+
+    @Override
+    public final String toString() {
+        final Map<String, String> map = MapUtils.copyOf(headers);
+        if (map.containsKey(AUTHORIZATION)) {
+            map.put(AUTHORIZATION, "**removed from output**");
+        }
+        return map.toString();
     }
 }
