@@ -1,23 +1,19 @@
 package io.sphere.sdk.exceptions;
 
-import java.io.IOException;
 
-/**
- * Exception thrown when the Sphere authorization service responds with other status code than HTTP 200 OK.
- *
- */
-public class AuthorizationException extends SphereException {
+public class AuthorizationException extends SphereServiceException {
     private static final long serialVersionUID = 0L;
+    public static final int STATUS_CODE = 401;
 
     public AuthorizationException(String message) {
-        super(message);
+        super(message, STATUS_CODE);
     }
 
     public AuthorizationException(Throwable cause) {
-        super(cause);
+        super(cause, STATUS_CODE);
     }
 
     public AuthorizationException(final String message, final Throwable cause) {
-        super(message, cause);
+        super(message, cause, STATUS_CODE);
     }
 }

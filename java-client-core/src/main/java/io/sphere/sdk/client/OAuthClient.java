@@ -1,8 +1,8 @@
 package io.sphere.sdk.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.sphere.sdk.exceptions.AuthorizationException;
-import io.sphere.sdk.exceptions.InvalidCredentialsException;
+import io.sphere.sdk.exceptions.InvalidClientCredentialsException;
+import io.sphere.sdk.exceptions.UnauthorizedException;
 import io.sphere.sdk.http.*;
 import io.sphere.sdk.utils.JsonUtils;
 import io.sphere.sdk.utils.MapUtils;
@@ -44,14 +44,14 @@ final class OAuthClient {
      */
     private Tokens parseResponse(final HttpResponse response) {
         if (response.getStatusCode() == 401 && response.getResponseBody().isPresent()) {
-            AuthorizationException authorizationException = new AuthorizationException(response.toString());
+            UnauthorizedException authorizationException = new UnauthorizedException(response.toString());
             try {
                 final JsonNode jsonNode = JsonUtils.newObjectMapper().readTree(response.getResponseBody().get());
                 if (jsonNode.get("error").asText().equals("invalid_client")) {
-                    authorizationException = new InvalidCredentialsException(config);
+                    authorizationException = new InvalidClientCredentialsException(config);
                 }
             } catch (final IOException e) {
-                authorizationException = new AuthorizationException(response.toString(), e);
+                authorizationException = new UnauthorizedException(response.toString(), e);
             }
             authorizationException.setProjectKey(config.getProjectKey());
             authorizationException.setUnderlyingHttpResponse(response.withoutRequest().toString());

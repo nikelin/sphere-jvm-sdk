@@ -18,7 +18,18 @@ public abstract class SphereServiceException extends SphereException {
         this.statusCode = statusCode;
     }
 
+    public SphereServiceException(final Throwable cause, final int statusCode) {
+        super(cause);
+        this.statusCode = statusCode;
+    }
+
+    public SphereServiceException(final String message, final Throwable cause, final int statusCode) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
     public int getStatusCode() {
         return statusCode;
     }
+
 }

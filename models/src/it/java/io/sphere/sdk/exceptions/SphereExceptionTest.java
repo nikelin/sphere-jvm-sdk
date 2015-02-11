@@ -80,14 +80,14 @@ public class SphereExceptionTest extends IntegrationTest {
 
     @Test
     public void invalidCredentialsToGetToken() throws Exception {
-        thrown.expect(InvalidCredentialsException.class);
+        thrown.expect(InvalidClientCredentialsException.class);
         final SphereAuthConfig config = SphereAuthConfig.of(projectKey(), clientId(), "wrong-password", authUrl());
         SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
     }
 
     @Test
     public void apiRequestWithWrongToken() throws Exception {
-        thrown.expect(UnauthorizedException.class);
+        thrown.expect(InvalidTokenException.class);
         final SphereApiConfig config = SphereApiConfig.of(projectKey(), apiUrl());
         final SphereClient client = SphereClientFactory.of().createClient(config, SphereAccessTokenSupplier.ofConstantToken("invalid-token"));
         client.execute(CategoryQuery.of()).join();
