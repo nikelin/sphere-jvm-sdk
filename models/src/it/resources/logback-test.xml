@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="sphere" level="TRACE"/>
+    <logger name="sphere" level="info"/>
     <logger name="com.ning.http.client" level="WARN"/>
     <logger name="org.javamoney.moneta.DefaultMonetaryContextFactory" level="WARN"/>
     <logger name="DefaultMonetaryContextFactory" level="WARN"/>
