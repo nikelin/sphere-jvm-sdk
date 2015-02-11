@@ -11,7 +11,6 @@ import io.sphere.sdk.utils.SphereIOUtils;
 import io.sphere.sdk.utils.SphereInternalLogger;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -32,16 +31,16 @@ final class SphereClientImpl extends Base implements SphereClient {
 
     @Override
     public <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest) {
-        final SphereRequest<T> usedClientRequest = new CachedHttpRequestSphereRequest<>(sphereRequest);
-        final HttpRequest httpRequest = usedClientRequest
-                .httpRequestIntent()
-                .plusHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
-                .plusHeader("Authorization", "Bearer " + tokenSupplier.get())
-                .prefixPath("/" + config.getProjectKey())
-                .toHttpRequest(config.getApiUrl());
+        final CompletableFuture<String> tokenFuture = tokenSupplier.get();
+        final SphereRequest<T> usedClientRequest = CachedHttpRequestSphereRequest.of(sphereRequest);
+        return tokenFuture.thenCompose(token -> execute(usedClientRequest, token));
+    }
+
+    private <T> CompletableFuture<T> execute(final SphereRequest<T> sphereRequest, final String token) {
+        final HttpRequest httpRequest = createHttpRequest(sphereRequest, token);
 
         final SphereInternalLogger logger = getLogger(httpRequest);
-        logger.debug(() -> usedClientRequest);
+        logger.debug(() -> sphereRequest);
         logger.trace(() -> {
             final String output;
             if (httpRequest.getBody().isPresent() && httpRequest.getBody().get() instanceof StringHttpRequestBody) {
@@ -55,7 +54,16 @@ final class SphereClientImpl extends Base implements SphereClient {
         });
         return httpClient.
                 execute(httpRequest).
-                thenApply(preProcess(usedClientRequest, objectMapper, config));
+                thenApply(preProcess(sphereRequest, objectMapper, config));
+    }
+
+    private <T> HttpRequest createHttpRequest(final SphereRequest<T> sphereRequest, final String token) {
+        return sphereRequest
+                    .httpRequestIntent()
+                    .plusHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
+                    .plusHeader("Authorization", "Bearer " + token)
+                    .prefixPath("/" + config.getProjectKey())
+                    .toHttpRequest(config.getApiUrl());
     }
 
     static <T> Function<HttpResponse, T> preProcess(final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper, final SphereApiConfig config) {
@@ -129,7 +137,7 @@ final class SphereClientImpl extends Base implements SphereClient {
     }
 
     private static <T> void fillExceptionWithData(final SphereRequest<T> sphereRequest, final HttpResponse httpResponse, final SphereException exception, final SphereApiConfig config) {
-        exception.setSphereRequest(sphereRequest.toString());
+        exception.setSphereRequest(sphereRequest);
         exception.setUnderlyingHttpRequest(sphereRequest.httpRequestIntent().toString());
         exception.setUnderlyingHttpResponse(httpResponse.withoutRequest().toString());
         exception.setProjectKey(config.getProjectKey());

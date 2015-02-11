@@ -51,7 +51,15 @@ final class SphereAccessTokenSupplierImpl extends Base implements SphereAccessTo
     }
 
     @Override
-    public String get() {
+    public CompletableFuture<String> get() {
+        try {
+            return CompletableFutureUtils.successful(getStringCompletableFutureBlocking());
+        } catch (final Exception e) {
+            return CompletableFutureUtils.failed(e);
+        }
+    }
+
+    private String getStringCompletableFutureBlocking() {
         synchronized (accessTokenLock) {
             Optional<ValidationE<AccessToken>> tokenResult = waitForToken();
             if (!tokenResult.isPresent()) {
