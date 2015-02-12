@@ -123,7 +123,6 @@ final class SphereClientImpl extends Base implements SphereClient {
             final ErrorResponse errorResponse = JsonUtils.readObject(ErrorResponse.typeReference(), httpResponse.getResponseBody().get());
             final SphereErrorResponseToExceptionMapper exceptionMapper = SphereErrorResponseToExceptionMapper.of();
             final SphereException exception = exceptionMapper.toException(errorResponse);
-            System.out.println(errorResponse);
             return exception;
         } else if (httpResponse.getStatusCode() == 404) {
             return new NotFoundException();
