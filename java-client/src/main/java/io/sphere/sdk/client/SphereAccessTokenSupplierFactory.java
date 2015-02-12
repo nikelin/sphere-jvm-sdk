@@ -32,17 +32,6 @@ public final class SphereAccessTokenSupplierFactory {
         return SphereAccessTokenSupplier.ofAutoRefresh(config, defaultHttpClient(), true);
     }
 
-    /**
-     * Provides a token generator which tries to always provide a valid token.
-     *
-     * @param config the configuration to fetch a token
-     * @param asyncHttpClient underlying client for http traffic
-     * @return token service
-     */
-    public SphereAccessTokenSupplier createSupplierOfAutoRefresh(final SphereAuthConfig config, final AsyncHttpClient asyncHttpClient) {
-        return SphereAccessTokenSupplier.ofAutoRefresh(config, NingAsyncHttpClientAdapter.of(asyncHttpClient), true);
-    }
-
     public SphereAccessTokenSupplier createSupplierOfOneTimeFetchingToken(final SphereAuthConfig config) {
         return SphereAccessTokenSupplier.ofOneTimeFetchingToken(config, defaultHttpClient(), true);
     }

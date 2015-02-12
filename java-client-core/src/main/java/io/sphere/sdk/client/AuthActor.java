@@ -22,6 +22,7 @@ final class AuthActor extends Actor {
     public AuthActor(final TokensSupplier internalTokensSupplier, final AccessTokenCallback accessTokenCallback) {
         this.internalTokensSupplier = internalTokensSupplier;
         this.accessTokenCallback = accessTokenCallback;
+        logBirth(this);
     }
 
     @Override
@@ -76,6 +77,7 @@ final class AuthActor extends Actor {
     @Override
     protected void closeInternal() {
         closeQuietly(internalTokensSupplier);
+        logClose(this);
     }
 
     public static class TokenIsRequestedMessage extends Base {

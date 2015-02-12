@@ -55,7 +55,7 @@ final class TokensSupplierImpl extends Base implements TokensSupplier {
     private void logTokenResult(final CompletableFuture<Tokens> result) {
         result.whenComplete((tokens, e) -> {
             if (tokens != null) {
-                AUTH_LOGGER.debug(() -> "Successfully fetched token that expires in" + tokens.getExpiresIn() + ".");
+                AUTH_LOGGER.debug(() -> "Successfully fetched token that expires in " + tokens.getExpiresIn().map(x -> x.toString()).orElse("an unknown time") + ".");
             } else {
                 AUTH_LOGGER.error(() -> "Failed to fetch token." + tokens.getExpiresIn(), e);
             }
@@ -63,7 +63,7 @@ final class TokensSupplierImpl extends Base implements TokensSupplier {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (!isClosed) {
             if (closeHttpClient) {
                 SphereIOUtils.closeQuietly(httpClient);

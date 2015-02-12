@@ -51,6 +51,6 @@ public interface SphereAccessTokenSupplier extends Closeable, Supplier<Completab
      */
     static SphereAccessTokenSupplier ofOneTimeFetchingToken(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
         final OnDemandSphereAccessTokenSupplier delegate = OnDemandSphereAccessTokenSupplier.of(config, httpClient, closeHttpClient);
-        return OneTimeSphereAccessTokenSupplier.of(delegate, closeHttpClient);
+        return OneTimeSphereAccessTokenSupplier.of(delegate, true);
     }
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
-final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
+public final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     private final AsyncHttpClient asyncHttpClient;
 
     NingAsyncHttpClientAdapter(final AsyncHttpClient asyncHttpClient) {
@@ -66,7 +66,7 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         asyncHttpClient.close();
     }
 
@@ -100,6 +100,7 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
     }
 
     private static CompletableFuture<Response> wrap(final ListenableFuture<Response> listenableFuture) {
+        //TODO use custom pool?
         return wrap(listenableFuture, ForkJoinPool.commonPool());
     }
 }

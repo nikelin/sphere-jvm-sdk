@@ -5,15 +5,18 @@ import io.sphere.sdk.models.Base;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static io.sphere.sdk.client.SphereAuth.*;
+
 final class OneTimeSphereAccessTokenSupplier extends Base implements SphereAccessTokenSupplier {
     private final SphereAccessTokenSupplier delegate;
-    private boolean shouldCloseAutomatically = false;
+    private final boolean shouldCloseAutomatically;
     private boolean isClosed = false;
     private Optional<CompletableFuture<String>> tokenFuture = Optional.empty();
 
     private OneTimeSphereAccessTokenSupplier(final SphereAccessTokenSupplier delegate, final boolean shouldCloseAutomatically) {
         this.delegate = delegate;
         this.shouldCloseAutomatically = shouldCloseAutomatically;
+        logBirth(this);
     }
 
     @Override
@@ -21,6 +24,7 @@ final class OneTimeSphereAccessTokenSupplier extends Base implements SphereAcces
         if (shouldCloseAutomatically && !isClosed) {
             delegate.close();
             isClosed = true;
+            logClose(this);
         }
     }
 
@@ -37,7 +41,6 @@ final class OneTimeSphereAccessTokenSupplier extends Base implements SphereAcces
         final CompletableFuture<String> result = delegate.get();
         if (shouldCloseAutomatically) {
             result.whenComplete((a, b) -> close());
-            shouldCloseAutomatically = false;
         }
         return result;
     }

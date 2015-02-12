@@ -3,6 +3,7 @@ package io.sphere.sdk.test;
 import io.sphere.sdk.client.*;
 import io.sphere.sdk.client.SphereRequest;
 import io.sphere.sdk.exceptions.ConcurrentModificationException;
+import org.junit.AfterClass;
 
 import java.util.concurrent.ExecutionException;
 
@@ -10,7 +11,7 @@ public abstract class IntegrationTest {
 
     private static TestClient client;
 
-    protected static TestClient client() {
+    protected synchronized static TestClient client() {
         if (client == null) {
             final SphereClientFactory factory = SphereClientFactory.of();
             final SphereClientConfig config = SphereClientConfig.of(projectKey(), clientId(), clientSecret(), authUrl(), apiUrl());
@@ -59,5 +60,18 @@ public abstract class IntegrationTest {
 
     protected static void fail(final String message) {
         throw new RuntimeException(message);
+    }
+
+    @AfterClass
+    public synchronized static void shutdownClient() {
+        if (client != null) {
+            client.close();
+            countThreads("after client close");
+            client = null;
+        }
+    }
+
+    protected static void countThreads(final String s) {
+        System.out.println("Threads active " + Thread.activeCount() + " " + s);
     }
 }

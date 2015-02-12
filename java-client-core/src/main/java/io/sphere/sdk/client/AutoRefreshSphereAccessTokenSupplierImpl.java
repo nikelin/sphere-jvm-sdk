@@ -6,6 +6,7 @@ import io.sphere.sdk.models.Base;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import static io.sphere.sdk.client.SphereAuth.*;
 import static io.sphere.sdk.utils.SphereIOUtils.closeQuietly;
 
 /**
@@ -20,6 +21,7 @@ final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements Sph
         final TokensSupplier internalTokensSupplier = TokensSupplierImpl.of(config, httpClient, closeHttpClient);
         authActor = new AuthActor(internalTokensSupplier, this);
         authActor.tell(new AuthActor.FetchTokenFromSphereMessage());
+        logBirth(this);
     }
 
     @Override
@@ -34,6 +36,7 @@ final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements Sph
     @Override
     public void close() {
         closeQuietly(authActor);
+        logClose(this);
     }
 
     public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
