@@ -12,21 +12,21 @@ import static io.sphere.sdk.utils.SphereIOUtils.closeQuietly;
  *  Holds OAuth access tokenCache for accessing protected Sphere HTTP API endpoints.
  *  Refreshes the access token as needed automatically.
  */
-final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier {
+final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier, AccessTokenCallback {
     private final AuthActor authActor;
     private volatile Optional<CompletableFuture<String>> cache = Optional.empty();
 
     private AutoRefreshSphereAccessTokenSupplierImpl(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
-        final TokensSupplier internalTokensSupplier = TokensSupplier.of(config, httpClient, closeHttpClient);
+        final TokensSupplier internalTokensSupplier = TokensSupplierImpl.of(config, httpClient, closeHttpClient);
         authActor = new AuthActor(internalTokensSupplier, this);
-        authActor.tell(new AuthActor.FetchTokenMessage());
+        authActor.tell(new AuthActor.FetchTokenFromSphereMessage());
     }
 
     @Override
     public CompletableFuture<String> get() {
         return cache.orElseGet(() -> {
             final CompletableFuture<String> callerTokenFuture = new CompletableFuture<>();
-            authActor.tell(new AuthActor.TokenRequestMessage(callerTokenFuture));
+            authActor.tell(new AuthActor.TokenIsRequestedMessage(callerTokenFuture));
             return callerTokenFuture;
         });
     }
@@ -40,6 +40,7 @@ final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements Sph
         return new AutoRefreshSphereAccessTokenSupplierImpl(config, httpClient, closeHttpClient);
     }
 
+    @Override
     public void setToken(final String accessToken) {
         cache = Optional.of(CompletableFutureUtils.successful(accessToken));
     }

@@ -10,7 +10,7 @@ final class OnDemandSphereAccessTokenSupplier extends Base implements SphereAcce
     private boolean isClosed = false;
 
     private OnDemandSphereAccessTokenSupplier(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
-        tokensSupplier = TokensSupplier.of(config, httpClient, closeHttpClient);
+        tokensSupplier = TokensSupplierImpl.of(config, httpClient, closeHttpClient);
     }
 
     @Override

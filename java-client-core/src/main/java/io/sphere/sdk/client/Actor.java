@@ -4,6 +4,7 @@ import io.sphere.sdk.models.Base;
 
 import java.io.Closeable;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 abstract class Actor extends Base implements Closeable {
@@ -11,6 +12,10 @@ abstract class Actor extends Base implements Closeable {
 
     public final void tell(final Object message) {
         executor.execute(() -> receive(message));
+    }
+
+    protected final void schedule(final Object message, final long delay, final TimeUnit unit) {
+        executor.schedule(() -> tell(message), delay, unit);
     }
 
     @Override
