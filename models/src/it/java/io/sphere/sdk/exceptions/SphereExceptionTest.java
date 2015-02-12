@@ -9,12 +9,14 @@ import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.models.Versioned;
+import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.test.IntegrationTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,7 +32,7 @@ public class SphereExceptionTest extends IntegrationTest {
     @Test
     public void invalidJsonInHttpRequestIntent() throws Throwable {
         executing(() -> TestSphereRequest.of(HttpRequestIntent.of(POST, "/categories", "{invalidJson :)")))
-                .resultsInA(JsonException.class);
+                .resultsInA(InvalidJsonInputException.class);
     }
 
     @Test
@@ -79,18 +81,26 @@ public class SphereExceptionTest extends IntegrationTest {
     }
 
     @Test
-    public void invalidCredentialsToGetToken() throws Exception {
-        thrown.expect(InvalidClientCredentialsException.class);
+    public void invalidCredentialsToGetToken() throws Throwable {
         final SphereAuthConfig config = SphereAuthConfig.of(projectKey(), clientId(), "wrong-password", authUrl());
-        SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
+        final CompletableFuture<String> future = SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config).get();
+        expectException(InvalidClientCredentialsException.class, future);
     }
 
     @Test
-    public void apiRequestWithWrongToken() throws Exception {
-        thrown.expect(InvalidTokenException.class);
+    public void apiRequestWithWrongToken() throws Throwable {
         final SphereApiConfig config = SphereApiConfig.of(projectKey(), apiUrl());
         final SphereClient client = SphereClientFactory.of().createClient(config, SphereAccessTokenSupplier.ofConstantToken("invalid-token"));
-        client.execute(CategoryQuery.of()).join();
+        expectException(InvalidTokenException.class, client.execute(CategoryQuery.of()));
+    }
+
+    private <T> void expectException(final Class<? extends SphereException> exceptionClass, final CompletableFuture<T> future) throws Throwable {
+        thrown.expect(exceptionClass);
+        try {
+            future.join();
+        } catch (final CompletionException e) {
+            throw e.getCause();
+        }
     }
 
     private DummyExceptionTestDsl aHttpResponseWithCode(final int responseCode) {

@@ -30,7 +30,7 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
                     return HttpResponse.of(response.getStatusCode(), body, Optional.of(httpRequest));
             });
         } catch (final IOException e) {
-            throw new HttpException(e);
+            return CompletableFutureUtils.failed(new HttpException(e));
         }
     }
 
@@ -57,7 +57,8 @@ final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
             } else if (body instanceof FileHttpRequestBody) {
                 builder.setBody(((FileHttpRequestBody) body).getUnderlying());
             } else if (body instanceof FormUrlEncodedHttpRequestBody) {
-                ((FormUrlEncodedHttpRequestBody) body).getData().forEach((name, value) ->  builder.addQueryParameter(name, value));
+                //TODO check
+                ((FormUrlEncodedHttpRequestBody) body).getData().forEach((name, value) -> builder.addQueryParameter(name, value));
             }
         });
         final Request build = builder.build();

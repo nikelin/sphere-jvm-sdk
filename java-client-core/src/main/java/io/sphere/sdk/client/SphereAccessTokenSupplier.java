@@ -6,6 +6,8 @@ import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import static io.sphere.sdk.utils.SphereIOUtils.closeQuietly;
+
 /** Provides an OAuth token for accessing protected Sphere HTTP API endpoints.
  *
  * There a no guarantees concerning the token providing mechanism.
@@ -25,7 +27,7 @@ public interface SphereAccessTokenSupplier extends Closeable, Supplier<Completab
      * @return token service
      */
     static SphereAccessTokenSupplier ofAutoRefresh(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
-        return SphereAccessTokenSupplierImpl.createAndBeginRefreshInBackground(config, httpClient, closeHttpClient);
+        return AutoRefreshSphereAccessTokenSupplierImpl.createAndBeginRefreshInBackground(config, httpClient, closeHttpClient);
     }
 
     /**
@@ -48,9 +50,7 @@ public interface SphereAccessTokenSupplier extends Closeable, Supplier<Completab
      * @return token service
      */
     static SphereAccessTokenSupplier ofOneTimeFetchingToken(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
-        final SphereAccessTokenSupplier refreshSupplier = ofAutoRefresh(config, httpClient, closeHttpClient);
-        final CompletableFuture<String> token = refreshSupplier.get();
-        refreshSupplier.close();
-        return new SphereConstantAccessTokenSupplierImpl(token);
+        final OnDemandSphereAccessTokenSupplier delegate = OnDemandSphereAccessTokenSupplier.of(config, httpClient, closeHttpClient);
+        return OneTimeSphereAccessTokenSupplier.of(delegate, closeHttpClient);
     }
 }

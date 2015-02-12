@@ -61,7 +61,7 @@ final class SphereClientImpl extends Base implements SphereClient {
         return sphereRequest
                     .httpRequestIntent()
                     .plusHeader("User-Agent", "SPHERE.IO JVM SDK " + BuildInfo.version())
-                    .plusHeader("Authorization", "Bearer " + token)
+                    .plusHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .prefixPath("/" + config.getProjectKey())
                     .toHttpRequest(config.getApiUrl());
     }
@@ -104,8 +104,11 @@ final class SphereClientImpl extends Base implements SphereClient {
     }
 
     private static <T> SphereException createFlatException(final HttpResponse httpResponse, final SphereRequest<T> sphereRequest, final ObjectMapper objectMapper) {
+        //TODO reorder, most common up, or use map and key value search
         if (isServiceNotAvailable(httpResponse)) {
             return new ServiceUnavailableException();
+        } else if(httpResponse.getStatusCode() == 401) {
+            return new InvalidTokenException();
         } else if(httpResponse.getStatusCode() == 500) {
             return new InternalServerErrorException();
         } else if(httpResponse.getStatusCode() == 502) {
@@ -116,10 +119,17 @@ final class SphereClientImpl extends Base implements SphereClient {
             return new GatewayTimeoutException();
         } else if (httpResponse.getStatusCode() == 409) {
             return new ConcurrentModificationException();
+        } else if (httpResponse.getStatusCode() == 400 && httpResponse.getResponseBody().isPresent()) {
+            final ErrorResponse errorResponse = JsonUtils.readObject(ErrorResponse.typeReference(), httpResponse.getResponseBody().get());
+            final SphereErrorResponseToExceptionMapper exceptionMapper = SphereErrorResponseToExceptionMapper.of();
+            final SphereException exception = exceptionMapper.toException(errorResponse);
+            System.out.println(errorResponse);
+            return exception;
         } else if (httpResponse.getStatusCode() == 404) {
             return new NotFoundException();
         } else {
-            return new JsonException("Can't parse backend response.");
+            //TODO maybe SphereException or JsonException more appropriate
+            return new SphereException("Can't parse backend response.");
         }
     }
 

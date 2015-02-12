@@ -4,40 +4,85 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.sphere.sdk.exceptions.InvalidClientCredentialsException;
 import io.sphere.sdk.exceptions.UnauthorizedException;
 import io.sphere.sdk.http.*;
+import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.JsonUtils;
 import io.sphere.sdk.utils.MapUtils;
+import io.sphere.sdk.utils.SphereIOUtils;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+import static io.sphere.sdk.client.SphereAuth.AUTH_LOGGER;
 import static io.sphere.sdk.http.HttpMethod.POST;
 import static java.lang.String.format;
 
-final class OAuthClient {
-    private final HttpClient httpClient;
-    private final SphereAuthConfig config;
+/**
+ * Component that can fetch SPHERE.IO access tokens.
+ * Does not refresh them,
+ */
+final class TokensSupplier extends Base implements Closeable, Supplier<CompletableFuture<Tokens>> {
 
-    private OAuthClient(final SphereAuthConfig config, final HttpClient httpClient) {
+    private final SphereAuthConfig config;
+    private final HttpClient httpClient;
+    private final boolean closeHttpClient;
+    private boolean isClosed = false;
+
+    private TokensSupplier(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
         this.config = config;
         this.httpClient = httpClient;
+        this.closeHttpClient = closeHttpClient;
     }
 
-    /** Asynchronously gets access and refresh tokens for given user from the authorization server
-     *  using the Resource owner credentials flow. */
-    public CompletableFuture<Tokens> getTokensForClient() {
+    static TokensSupplier of(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
+        return new TokensSupplier(config, httpClient, closeHttpClient);
+    }
+
+    /**
+     * Executes a http auth sphere request and fetches a new access token.
+     * @return future of a token
+     */
+    @Override
+    public CompletableFuture<Tokens> get() {
+        AUTH_LOGGER.debug(() -> "Fetching new token.");
+        final CompletableFuture<Tokens> result = httpClient.execute(newRequest()).thenApply(this::parseResponse);
+        logTokenResult(result);
+        return result;
+    }
+
+    private void logTokenResult(final CompletableFuture<Tokens> result) {
+        result.whenComplete((tokens, e) -> {
+            if (tokens != null) {
+                AUTH_LOGGER.debug(() -> "Successfully fetched token that expires in" + tokens.getExpiresIn() + ".");
+            } else {
+                AUTH_LOGGER.error(() -> "Failed to fetch token." + tokens.getExpiresIn(), e);
+            }
+        });
+    }
+
+    @Override
+    public void close() {
+        if (!isClosed) {
+            if (closeHttpClient) {
+                SphereIOUtils.closeQuietly(httpClient);
+            }
+            isClosed = true;
+        }
+    }
+
+    private HttpRequest newRequest() {
         final String usernamePassword = format("%s:%s", config.getClientId(), config.getClientSecret());
         final String encodedString = Base64.getEncoder().encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
         final HttpHeaders httpHeaders = HttpHeaders
-                .of("Authorization", "Basic " + encodedString)
-                .plus("Content-Type", "application/x-www-form-urlencoded");
+                .of(HttpHeaders.AUTHORIZATION, "Basic " + encodedString)
+                .plus(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
         final FormUrlEncodedHttpRequestBody body = FormUrlEncodedHttpRequestBody.of(MapUtils.mapOf("grant_type", "client_credentials", "scope", format("manage_project:%s", config.getProjectKey())));
-        final HttpRequest request = HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", httpHeaders, Optional.of(body));
-        return httpClient.execute(request).thenApply(this::parseResponse);
+        return HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", httpHeaders, Optional.of(body));
     }
-
 
     /** Parses Tokens from a response from the backend authorization service.
      *  @param response Response from the authorization service.
@@ -58,9 +103,5 @@ final class OAuthClient {
             throw authorizationException;
         }
         return JsonUtils.readObject(Tokens.typeReference(), response.getResponseBody().get());
-    }
-
-    public static OAuthClient of(final SphereAuthConfig config, final HttpClient httpClient) {
-        return new OAuthClient(config, httpClient);
     }
 }

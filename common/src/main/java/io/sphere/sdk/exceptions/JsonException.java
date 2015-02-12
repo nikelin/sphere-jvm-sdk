@@ -5,7 +5,7 @@ import io.sphere.sdk.http.HttpResponse;
 /**
  * Exception concerning JSON.
  *
- * {@include.example io.sphere.sdk.exceptions.SphereExceptionTest#invalidJsonInHttpRequestIntent()}
+ * This may occur by parsing JSON from SPHERE.IO and the POJO mapping does not work correctly.
  *
  */
 public class JsonException extends SphereException {
@@ -24,10 +24,6 @@ public class JsonException extends SphereException {
 
     public JsonException(final String message, final Throwable cause) {
         super(message, cause);
-    }
-
-    public JsonException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
     public JsonException(final HttpResponse httpResponse) {
