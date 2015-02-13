@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 import static io.sphere.sdk.utils.SphereInternalLogger.getLogger;
 
-final class SphereClientImpl extends Base implements SphereClient {
+final class SphereClientImpl extends AutoCloseableService implements SphereClient {
     private final ObjectMapper objectMapper = JsonUtils.newObjectMapper();
     private final HttpClient httpClient;
     private final SphereApiConfig config;
@@ -153,7 +153,7 @@ final class SphereClientImpl extends Base implements SphereClient {
     }
 
     @Override
-    public void close() {
+    protected void internalClose() {
         SphereIOUtils.closeQuietly(tokenSupplier);
         SphereIOUtils.closeQuietly(httpClient);
     }

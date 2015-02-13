@@ -1,13 +1,10 @@
 package io.sphere.sdk.client;
 
-import io.sphere.sdk.models.Base;
-
-import java.io.Closeable;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-abstract class Actor extends Base implements Closeable {
+abstract class Actor extends AutoCloseableService {
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);//kind of mailbox
 
     public final void tell(final Object message) {
@@ -19,8 +16,8 @@ abstract class Actor extends Base implements Closeable {
     }
 
     @Override
-    public final void close() {
-        closeInternal();
+    protected void internalClose() {
+        closeThisActor();
         executor.shutdown();
     }
 
@@ -45,6 +42,6 @@ abstract class Actor extends Base implements Closeable {
         }
     }
 
-    protected abstract void closeInternal();
+    protected abstract void closeThisActor();
     protected abstract void receive(final Object message);
 }

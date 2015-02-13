@@ -1,13 +1,9 @@
 package io.sphere.sdk.client;
 
-import io.sphere.sdk.models.Base;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static io.sphere.sdk.client.SphereAuth.*;
-
-final class OneTimeSphereAccessTokenSupplier extends Base implements SphereAccessTokenSupplier {
+final class OneTimeSphereAccessTokenSupplier extends AutoCloseableService implements SphereAccessTokenSupplier {
     private final SphereAccessTokenSupplier delegate;
     private final boolean shouldCloseAutomatically;
     private boolean isClosed = false;
@@ -16,15 +12,13 @@ final class OneTimeSphereAccessTokenSupplier extends Base implements SphereAcces
     private OneTimeSphereAccessTokenSupplier(final SphereAccessTokenSupplier delegate, final boolean shouldCloseAutomatically) {
         this.delegate = delegate;
         this.shouldCloseAutomatically = shouldCloseAutomatically;
-        logBirth(this);
     }
 
     @Override
-    public synchronized void close() {
+    protected synchronized void internalClose() {
         if (shouldCloseAutomatically && !isClosed) {
             delegate.close();
             isClosed = true;
-            logClose(this);
         }
     }
 

@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static io.sphere.sdk.client.CompletableFutureUtils.transferResult;
-import static io.sphere.sdk.utils.SphereIOUtils.closeQuietly;
 import static io.sphere.sdk.client.SphereAuth.*;
 
 final class AuthActor extends Actor {
@@ -22,7 +21,6 @@ final class AuthActor extends Actor {
     public AuthActor(final TokensSupplier internalTokensSupplier, final AccessTokenCallback accessTokenCallback) {
         this.internalTokensSupplier = internalTokensSupplier;
         this.accessTokenCallback = accessTokenCallback;
-        logBirth(this);
     }
 
     @Override
@@ -75,9 +73,8 @@ final class AuthActor extends Actor {
 
 
     @Override
-    protected void closeInternal() {
+    protected void closeThisActor() {
         closeQuietly(internalTokensSupplier);
-        logClose(this);
     }
 
     public static class TokenIsRequestedMessage extends Base {

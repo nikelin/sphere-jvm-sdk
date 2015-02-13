@@ -1,19 +1,17 @@
 package io.sphere.sdk.client;
 
 import io.sphere.sdk.http.HttpClient;
-import io.sphere.sdk.models.Base;
 
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import static io.sphere.sdk.client.SphereAuth.*;
-import static io.sphere.sdk.utils.SphereIOUtils.closeQuietly;
 
 /**
  *  Holds OAuth access tokenCache for accessing protected Sphere HTTP API endpoints.
  *  Refreshes the access token as needed automatically.
  */
-final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements SphereAccessTokenSupplier, AccessTokenCallback {
+final class AutoRefreshSphereAccessTokenSupplierImpl extends AutoCloseableService implements SphereAccessTokenSupplier, AccessTokenCallback {
     private final AuthActor authActor;
     private volatile Optional<CompletableFuture<String>> cache = Optional.empty();
 
@@ -21,7 +19,6 @@ final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements Sph
         final TokensSupplier internalTokensSupplier = TokensSupplierImpl.of(config, httpClient, closeHttpClient);
         authActor = new AuthActor(internalTokensSupplier, this);
         authActor.tell(new AuthActor.FetchTokenFromSphereMessage());
-        logBirth(this);
     }
 
     @Override
@@ -34,9 +31,8 @@ final class AutoRefreshSphereAccessTokenSupplierImpl extends Base implements Sph
     }
 
     @Override
-    public void close() {
+    protected void internalClose() {
         closeQuietly(authActor);
-        logClose(this);
     }
 
     public static SphereAccessTokenSupplier createAndBeginRefreshInBackground(final SphereAuthConfig config, final HttpClient httpClient, final boolean closeHttpClient) {
