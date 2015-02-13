@@ -3,13 +3,11 @@ scala:
 - 2.10.0
 script:
 - ./sbt genDoc test it:test
+- bash scripts/publish-javadoc-branch-folder.sh > /dev/null 2> /dev/null
+before_install:
+ - "sudo apt-get install graphviz"
 after_success:
-- if [ "$TRAVIS_BRANCH"  = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then sbt
-  "jvm-sdk/gitPublish target/javaunidoc https://$GH_TOKEN:x-oauth-basic@github.com/$TRAVIS_REPO_SLUG.git
-  \"javadoc/<version>\" sphere-oss automation@commercetools.de"; fi
-- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then sbt "jvm-sdk/gitPublish target/javaunidoc
-  https://$GH_TOKEN:x-oauth-basic@github.com/$TRAVIS_REPO_SLUG.git \"javadoc/$TRAVIS_BRANCH\"
-  sphere-oss automation@commercetools.de"; fi
+- bash scripts/publish-javadoc-version-folder.sh > /dev/null 2> /dev/null
 notifications:
   email:
     on_success: never
