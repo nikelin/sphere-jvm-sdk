@@ -70,7 +70,7 @@ public class AuthActorTest {
     }
 
     private void wait(final AccessTokenCallback1 tokenCallback) {
-        wait(tokenCallback, 50);
+        wait(tokenCallback, 80);
     }
 
     private void wait(final AccessTokenCallback1 tokenCallback, final int timeout) {
