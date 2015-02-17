@@ -119,7 +119,7 @@ public final class SphereInternalLogger {
         return getLogger(firstPathElement + ".responses." + lastPathElement);
     }
 
-    public static SphereInternalLogger getLoggerForNonHttp(final Class<?> clazz) {
+    public static SphereInternalLogger getLogger(final Class<?> clazz) {
         return new SphereInternalLogger(LoggerFactory.getLogger(clazz));
     }
 

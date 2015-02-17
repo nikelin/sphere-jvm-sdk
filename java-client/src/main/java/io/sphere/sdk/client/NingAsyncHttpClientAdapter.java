@@ -2,6 +2,7 @@ package io.sphere.sdk.client;
 
 import com.ning.http.client.*;
 import io.sphere.sdk.http.*;
+import io.sphere.sdk.utils.SphereInternalLogger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
 public final class NingAsyncHttpClientAdapter extends AutoCloseableService implements HttpClient {
+    private static final SphereInternalLogger LOGGER = SphereInternalLogger.getLogger(NingAsyncHttpClientAdapter.class);
     private final AsyncHttpClient asyncHttpClient;
 
     NingAsyncHttpClientAdapter(final AsyncHttpClient asyncHttpClient) {
@@ -20,13 +22,16 @@ public final class NingAsyncHttpClientAdapter extends AutoCloseableService imple
 
     @Override
     public CompletableFuture<HttpResponse> execute(final HttpRequest httpRequest) {
+        LOGGER.debug(() -> "executing " + httpRequest);
         final Request request = asNingRequest(httpRequest);
         try {
             final CompletableFuture<Response> future = wrap(asyncHttpClient.executeRequest(request));
             return future.thenApply((Response response) -> {
-                    final byte[] responseBodyAsBytes = getResponseBodyAsBytes(response);
-                    Optional<byte[]> body = responseBodyAsBytes.length > 0 ? Optional.of(responseBodyAsBytes) : Optional.empty();
-                    return HttpResponse.of(response.getStatusCode(), body, Optional.of(httpRequest));
+                final byte[] responseBodyAsBytes = getResponseBodyAsBytes(response);
+                Optional<byte[]> body = responseBodyAsBytes.length > 0 ? Optional.of(responseBodyAsBytes) : Optional.empty();
+                final HttpResponse httpResponse = HttpResponse.of(response.getStatusCode(), body, Optional.of(httpRequest));
+                LOGGER.debug(() -> "response " + httpResponse);
+                return httpResponse;
             });
         } catch (final IOException e) {
             return CompletableFutureUtils.failed(new HttpException(e));

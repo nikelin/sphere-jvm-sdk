@@ -13,7 +13,7 @@ abstract class AutoCloseableService extends Base implements AutoCloseable {
     }
 
     private void log(final Supplier<Object> message) {
-        SphereInternalLogger.getLoggerForNonHttp(this.getClass()).trace(message);
+        SphereInternalLogger.getLogger(this.getClass()).trace(message);
     }
 
     private String getLogName() {
