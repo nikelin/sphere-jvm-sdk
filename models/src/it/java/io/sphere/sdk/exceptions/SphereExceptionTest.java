@@ -83,15 +83,30 @@ public class SphereExceptionTest extends IntegrationTest {
     @Test
     public void invalidCredentialsToGetToken() throws Throwable {
         final SphereAuthConfig config = SphereAuthConfig.of(projectKey(), clientId(), "wrong-password", authUrl());
-        final CompletableFuture<String> future = SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config).get();
+        final SphereAccessTokenSupplier supplierOfOneTimeFetchingToken = SphereAccessTokenSupplierFactory.of().createSupplierOfOneTimeFetchingToken(config);
+        final CompletableFuture<String> future = supplierOfOneTimeFetchingToken.get();
         expectException(InvalidClientCredentialsException.class, future);
+        supplierOfOneTimeFetchingToken.close();
     }
 
     @Test
     public void apiRequestWithWrongToken() throws Throwable {
+        client();
+
         final SphereApiConfig config = SphereApiConfig.of(projectKey(), apiUrl());
         final SphereClient client = SphereClientFactory.of().createClient(config, SphereAccessTokenSupplier.ofConstantToken("invalid-token"));
-        expectException(InvalidTokenException.class, client.execute(CategoryQuery.of()));
+        expectExceptionAndClose(client, InvalidTokenException.class, client.execute(CategoryQuery.of()));
+    }
+
+    private void expectExceptionAndClose(final SphereClient client, final Class<InvalidTokenException> exceptionClass, final CompletableFuture<PagedQueryResult<Category>> future) throws Throwable {
+        thrown.expect(exceptionClass);
+        try {
+            future.join();
+        } catch (final CompletionException e) {
+            client.close();
+            throw e.getCause();
+        }
+
     }
 
     private <T> void expectException(final Class<? extends SphereException> exceptionClass, final CompletableFuture<T> future) throws Throwable {

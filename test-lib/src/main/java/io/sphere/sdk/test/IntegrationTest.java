@@ -4,12 +4,14 @@ import io.sphere.sdk.client.*;
 import io.sphere.sdk.client.SphereRequest;
 import io.sphere.sdk.exceptions.ConcurrentModificationException;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import java.util.concurrent.ExecutionException;
 
 public abstract class IntegrationTest {
 
-    private static TestClient client;
+    private static volatile TestClient client;
+    private static volatile int threadCountAtStart;
 
     protected synchronized static TestClient client() {
         if (client == null) {
@@ -62,16 +64,24 @@ public abstract class IntegrationTest {
         throw new RuntimeException(message);
     }
 
+    @BeforeClass
+    public synchronized static void setup() {
+        threadCountAtStart = countThreads();
+    }
+
     @AfterClass
     public synchronized static void shutdownClient() {
         if (client != null) {
             client.close();
-            countThreads("after client close");
             client = null;
+            final int threadsNow = countThreads();
+            if (threadsNow > threadCountAtStart) {
+                throw new RuntimeException("Thread leak! After client shutdown created threads are still alive. Threads now: " + threadsNow + " Threads before: " + threadCountAtStart);
+            }
         }
     }
 
-    protected static void countThreads(final String s) {
-        System.out.println("Threads active " + Thread.activeCount() + " " + s);
+    protected static int countThreads() {
+        return Thread.activeCount();
     }
 }

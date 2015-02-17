@@ -3,6 +3,7 @@ package io.sphere.sdk.client;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+//document auto closing
 final class OneTimeSphereAccessTokenSupplier extends AutoCloseableService implements SphereAccessTokenSupplier {
     private final SphereAccessTokenSupplier delegate;
     private final boolean shouldCloseAutomatically;
@@ -24,11 +25,12 @@ final class OneTimeSphereAccessTokenSupplier extends AutoCloseableService implem
 
     @Override
     public final synchronized CompletableFuture<String> get() {
-        return tokenFuture.orElseGet(() -> {
+        final CompletableFuture<String> future = tokenFuture.orElseGet(() -> {
             final CompletableFuture<String> tokenFuture = fetchToken();
             this.tokenFuture = Optional.of(tokenFuture);
             return tokenFuture;
         });
+        return future;
     }
 
     private CompletableFuture<String> fetchToken() {

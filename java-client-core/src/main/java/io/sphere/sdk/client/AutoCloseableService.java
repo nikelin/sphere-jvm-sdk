@@ -21,7 +21,7 @@ abstract class AutoCloseableService extends Base implements AutoCloseable {
     }
 
     @Override
-    public final void close() {
+    public final synchronized void close() {
         try {
             internalClose();
         } finally {

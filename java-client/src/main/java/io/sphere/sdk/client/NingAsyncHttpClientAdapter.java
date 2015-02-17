@@ -2,7 +2,6 @@ package io.sphere.sdk.client;
 
 import com.ning.http.client.*;
 import io.sphere.sdk.http.*;
-import io.sphere.sdk.models.Base;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
-public final class NingAsyncHttpClientAdapter extends Base implements HttpClient {
+public final class NingAsyncHttpClientAdapter extends AutoCloseableService implements HttpClient {
     private final AsyncHttpClient asyncHttpClient;
 
     NingAsyncHttpClientAdapter(final AsyncHttpClient asyncHttpClient) {
@@ -66,7 +65,7 @@ public final class NingAsyncHttpClientAdapter extends Base implements HttpClient
     }
 
     @Override
-    public synchronized void close() {
+    public void internalClose() {
         asyncHttpClient.close();
     }
 
