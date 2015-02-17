@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static io.sphere.sdk.client.SphereAuth.AUTH_LOGGER;
 import static io.sphere.sdk.http.HttpMethod.POST;
-import static io.sphere.sdk.http.UrlUtils.urlEncode;
 import static java.lang.String.format;
 
 /**
