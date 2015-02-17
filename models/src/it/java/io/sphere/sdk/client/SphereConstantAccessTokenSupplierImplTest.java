@@ -22,6 +22,7 @@ public class SphereConstantAccessTokenSupplierImplTest extends IntegrationTest {
             final SphereClient oneTokenClient = SphereClientFactory.of().createClient(apiConfig, fixedTokenSupplier);
             final int actual = oneTokenClient.execute(categoryQuery).join().getTotal();
             assertThat(actual).isEqualTo(expected);
+            oneTokenClient.close();
         });
     }
 }
