@@ -50,33 +50,15 @@ client secret: 222222222222222222222222222222226</code></pre>
 
  {@include.example example.TaxCategoryQueryExample#exampleQuery()}
 
- <h3 id=add-functionality-to-the-client>Using design patterns to add functionality to the clients</h3>
- <p>The clients are interfaces which have a default implementation (add "Impl" to the interface name).<br>
- This enables you to use the <a href="http://en.wikipedia.org/wiki/Decorator_pattern">decorator pattern</a> to configure the cross concern behaviour of the client:</p>
+ <h3 id=closing>Closing the client</h3>
 
+ The client holds resources like thread pools and IO connections, so call {@link io.sphere.sdk.client.SphereClient#close()} to release them.
+
+ <h3 id=further-client-infos>Further client information</h3>
  <ul>
- <li>setup recover mechanisms like returning empty lists or retry the request</li>
- <li>log events</li>
- <li>set timeouts (depending on the future implementation)</li>
- <li>return fake answers for tests</li>
- <li>configure throttling.</li>
+  <li>{@link SphereClientTuningDocumentation Tuning the client}</li>
+  <li>{@link io.sphere.sdk.meta.TestingDocumentation Writing unit tests with the client}</li>
  </ul>
-
- <p>The following listing shows a pimped client which updates metrics on responses, retries commands and sets default values:</p>
-
- {@include.example io.sphere.sdk.client.WrappedClientDemo}
-
- <h3 id=client-test-doubles>Client test doubles for unit tests</h3>
-
- <p>Since the clients are interfaces you can implement them to provide test doubles.</p>
- <p>Here are some example to provide fake client responses in tests:</p>
-
- {@include.example io.sphere.sdk.client.TestsDemo#withInstanceResults()}
-
- {@include.example io.sphere.sdk.client.TestsDemo#modelInstanceFromJson()}
-
- {@include.example io.sphere.sdk.client.TestsDemo#withJson()}
-
  */
 public final class GettingStarted extends Base {
     private GettingStarted() {
