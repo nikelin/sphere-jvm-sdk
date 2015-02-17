@@ -4,7 +4,9 @@ import io.sphere.sdk.models.Base;
 
 /**
  <h3 id=about-clients>About the clients</h3>
- <p>The SPHERE.IO client communicates asynchronously with the SPHERE.IO backend via HTTPS.</p>
+ <p>The SPHERE.IO client communicates asynchronously with the SPHERE.IO API via HTTPS and takes care about authentication.</p>
+ <p>The client uses Java objects to formulate a HTTP request, performs the request and maps the response JSON into a Java object.
+ The resulting Java object is not directly accessible as object, it is embedded in a Future/Promise for asynchronous programming.</p>
 
  <p>There are different SPHERE.IO client flavors for different future implementations:</p>
 
