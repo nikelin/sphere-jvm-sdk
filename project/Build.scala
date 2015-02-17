@@ -36,7 +36,7 @@ object Build extends Build {
   lazy val `java-client-core` = project.configs(IntegrationTest).dependsOn(common).settings(commonSettings:_*)
 
   lazy val `java-client` = project.configs(IntegrationTest).dependsOn(`java-client-core`).settings(commonSettings:_*)
-  .settings(libraryDependencies ++= Seq("com.ning" % "async-http-client" % "1.8.15"))
+  .settings(libraryDependencies ++= Seq("com.ning" % "async-http-client" % "1.8.15" withSources()))
 
   lazy val common = project.configs(IntegrationTest).settings(writeVersionSettings: _*).settings(commonSettings:_*)
 
