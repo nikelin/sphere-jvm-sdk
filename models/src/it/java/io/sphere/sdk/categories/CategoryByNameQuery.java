@@ -7,13 +7,12 @@ import io.sphere.sdk.http.HttpRequestIntent;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.queries.*;
 import io.sphere.sdk.http.HttpMethod;
-import io.sphere.sdk.http.HttpRequest;
 import io.sphere.sdk.http.HttpResponse;
 import io.sphere.sdk.utils.JsonUtils;
 
 import java.util.Locale;
 
-import static io.sphere.sdk.utils.UrlUtils.urlEncode;
+import static io.sphere.sdk.http.UrlUtils.*;
 
 /**
  * This is an example of hard coding queries without using helper classes.

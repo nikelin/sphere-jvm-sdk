@@ -6,7 +6,6 @@ import io.sphere.sdk.exceptions.UnauthorizedException;
 import io.sphere.sdk.http.*;
 import io.sphere.sdk.models.Base;
 import io.sphere.sdk.utils.JsonUtils;
-import io.sphere.sdk.utils.MapUtils;
 import io.sphere.sdk.utils.SphereIOUtils;
 
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static io.sphere.sdk.client.SphereAuth.AUTH_LOGGER;
 import static io.sphere.sdk.http.HttpMethod.POST;
+import static io.sphere.sdk.http.UrlUtils.urlEncode;
 import static java.lang.String.format;
 
 /**
@@ -78,8 +78,8 @@ final class TokensSupplierImpl extends Base implements TokensSupplier {
         final HttpHeaders httpHeaders = HttpHeaders
                 .of(HttpHeaders.AUTHORIZATION, "Basic " + encodedString)
                 .plus(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-        final FormUrlEncodedHttpRequestBody body = FormUrlEncodedHttpRequestBody.of(MapUtils.mapOf("grant_type", "client_credentials", "scope", format("manage_project:%s", config.getProjectKey())));
-        return HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token", httpHeaders, Optional.of(body));
+        final String queryParams = urlEncode("?grant_type=client_credentials") + "&" + urlEncode("scope=" + format("manage_project:%s", config.getProjectKey()));
+        return HttpRequest.of(POST, config.getAuthUrl() + "/oauth/token" + queryParams, httpHeaders, Optional.<HttpRequestBody>empty());
     }
 
     /** Parses Tokens from a response from the backend authorization service.
