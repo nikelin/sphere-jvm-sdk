@@ -54,6 +54,11 @@ public class MoneyTest {
                 .isEqualTo(asSet(MoneyImpl.of(355, EUR), MoneyImpl.of(98774, EUR)));
     }
 
+    @Test
+    public void defaultCurrencyUnits() throws Exception {
+        MoneyImpl.of(new BigDecimal(1), DefaultCurrencyUnits.EUR);
+    }
+
     private void checkSerialization(final MonetaryAmount money, final String json) {
         final String jsonString = JsonUtils.toJson(money);
         assertThat(jsonString).isEqualTo(json);
