@@ -42,6 +42,8 @@ abstract class Actor extends AutoCloseableService {
         }
     }
 
-    protected abstract void closeThisActor();
+    protected void closeThisActor() {
+
+    }
     protected abstract void receive(final Object message);
 }

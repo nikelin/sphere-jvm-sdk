@@ -3,6 +3,7 @@ package io.sphere.sdk.client;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 final class CompletableFutureUtils {
@@ -36,6 +37,22 @@ final class CompletableFutureUtils {
                 futureTarget.complete(result);
             } else {
                 futureTarget.completeExceptionally(throwable);
+            }
+        });
+    }
+
+    public static <T> CompletableFuture<T> onFailure(final CompletableFuture<T> future, final Consumer<Throwable> consumer) {
+        return future.whenCompleteAsync((value, throwable) -> {
+            if (throwable != null) {
+                consumer.accept(throwable);
+            }
+        });
+    }
+
+    public static <T> CompletableFuture<T> onSuccess(final CompletableFuture<T> future, final Consumer<T> consumer) {
+        return future.whenCompleteAsync((value, throwable) -> {
+            if (throwable == null) {
+                consumer.accept(value);
             }
         });
     }
